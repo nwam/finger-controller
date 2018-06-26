@@ -1,5 +1,7 @@
 # Finger People
-Finger People uses a hand-character model as a natural input for video games. In this model, the player's hand represents their character in the video game, where the index and middle finger serve as the character's legs, and the rest of the hand acts as a large upper-body. Finger People is implemented with a single RGB camera. See Finger People in action with Super Mario Bros. in [this video](https://www.youtube.com/watch?v=HhO2iqlgZCQ)!
+Finger People uses a hand-character model as a natural input for video games. In this model, the player's hand represents their character in the video game, where the index and middle finger serve as the character's legs, and the rest of the hand acts as a large upper-body. Finger People is implemented with a single RGB camera. 
+
+See Finger People in action with Super Mario Bros. in [this video](https://www.youtube.com/watch?v=HhO2iqlgZCQ)!
 
 ## The Model
 ![The hand-character model](img/hand-character-model.png)
