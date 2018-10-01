@@ -150,3 +150,19 @@ class Hand:
         g += 'K' if self.kick else '0'
         return g
 
+if __name__ == '__main__':
+    import pdb
+    hand = Hand()
+    hand.j_cooldown = 5.0
+    hand.position = (0, 4)
+    print(hand.velocity)
+    print(hand.gestures_pretty())
+    print(hand.r_direction)
+    hand.position = (-19, 3)
+    print(hand.velocity)
+    print(hand.gestures_pretty())
+    print(hand.r_direction)
+
+    print(hand.gestures_pretty())
+    hand.velocity = (4, -16)
+    print(hand.gestures_pretty())
