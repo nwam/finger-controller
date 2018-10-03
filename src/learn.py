@@ -60,6 +60,7 @@ if __name__ == '__main__':
 
     model.fit_generator(generator=training_generator,
                         validation_data=validation_generator,
+                        epochs=20,
                         use_multiprocessing=True,
                         workers=6,
                         callbacks=[checkpoint_callback])
