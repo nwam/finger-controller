@@ -8,7 +8,7 @@ import cv2
 data_dir = '../data/preprocessed/'
 input_shape = (28, 28, 3)
 class_ids = {'stand': 0, 'walk': 2, 'run': 3, 'jumps': 1}
-ids_classes = dict([(v,k) for k,v in class_ids.items()])
+id_to_class = dict([(v,k) for k,v in class_ids.items()])
 n_classes = len(class_ids)
 
 class DataGenerator(keras.utils.Sequence):
