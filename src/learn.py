@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 import os
 import dataset
 
-n_classes = dataset.get_n_classes()
+n_classes = dataset.n_classes
 checkpoints_dir = './checkpoints'
 
 def build_model(input_shape=dataset.input_shape, n_classes=n_classes):
@@ -37,18 +37,14 @@ def build_model(input_shape=dataset.input_shape, n_classes=n_classes):
 
     return model
 
-if __name__ == '__main__':
+def train():
     #K.set_image_data_format('channels_last')
     #numpy.random.seed(0)
 
     if not os.path.exists(checkpoints_dir):
         os.makedirs(checkpoints_dir)
 
-    labels = dataset.get_labels()
-    partition = dataset.partition_labels(labels)
-
-    training_generator = dataset.DataGenerator(partition['train'], labels)
-    validation_generator = dataset.DataGenerator(partition['validation'], labels)
+    training_generator, validation_generator = dataset.get_generators()
 
     model = build_model()
 
@@ -65,5 +61,10 @@ if __name__ == '__main__':
                         workers=6,
                         callbacks=[checkpoint_callback])
 
+    model.save(os.path.join(checkpoints_dir, 'final_model.hdf5'))
+
     #scores = model.evaluate(x_test, y_test, verbose = 10 )
     #print(scores)
+
+if __name__ == '__main__':
+    train()

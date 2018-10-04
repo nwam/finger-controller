@@ -7,21 +7,9 @@ import cv2
 
 data_dir = '../data/preprocessed/'
 input_shape = (28, 28, 3)
-
-def get_n_classes(data_dir=data_dir):
-    return len([0 for d in os.listdir(data_dir)
-            if os.path.isdir(os.path.join(data_dir, d))])
-
-def get_class_ids(data_dir=data_dir):
-    classes = [d for d in os.listdir(data_dir)
-            if os.path.isdir(os.path.join(data_dir, d))]
-    class_ids = {}
-    for i, c in enumerate(classes):
-        class_ids[c] = i
-    return class_ids
-
-n_classes = get_n_classes()
-class_ids = get_class_ids()
+class_ids = {'stand': 0, 'walk': 2, 'run': 3, 'jumps': 1}
+ids_classes = dict([(v,k) for k,v in class_ids.items()])
+n_classes = len(class_ids)
 
 class DataGenerator(keras.utils.Sequence):
     def __init__(self, list_IDs, labels, data_dir=data_dir, batch_size=32,
@@ -100,3 +88,12 @@ def partition_labels(labels, train=0.8):
     partition['validation'] = keys[split:]
 
     return partition
+
+def get_generators():
+    labels = get_labels()
+    partition = partition_labels(labels)
+
+    training_generator = DataGenerator(partition['train'], labels)
+    validation_generator = DataGenerator(partition['validation'], labels)
+
+    return training_generator, validation_generator
