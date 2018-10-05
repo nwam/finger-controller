@@ -7,7 +7,7 @@ import cv2
 
 data_dir = '../data/preprocessed/'
 input_shape = (28, 28, 3)
-class_ids = {'stand': 0, 'walk': 2, 'run': 3, 'jumps': 1}
+class_ids = {'stand': 0, 'walk': 1, 'run': 2, 'jump': 3, 'kick': 4}
 id_to_class = dict([(v,k) for k,v in class_ids.items()])
 n_classes = len(class_ids)
 
