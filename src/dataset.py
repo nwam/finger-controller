@@ -1,9 +1,11 @@
+import keras.utils
+from keras.preprocessing.image import ImageDataGenerator
 import os
 import random
 import copy
-import keras.utils
 import numpy as np
 import cv2
+from collections import defaultdict
 
 data_dir = '../data/preprocessed/'
 input_shape = (28, 28, 3)
@@ -22,6 +24,14 @@ class DataGenerator(keras.utils.Sequence):
         self.shuffle = shuffle
         self.data_dir = data_dir
         self.on_epoch_end()
+        self.datagen = ImageDataGenerator(
+                width_shift_range=0.4,
+                height_shift_range=0.4,
+                rescale=1/255,
+                shear_range=0.35,
+                zoom_range=0.35,
+                horizontal_flip=True,
+                fill_mode='nearest')
 
     def __data_generation(self, list_IDs_temp):
         """ Generates data containing batch_size samples """
@@ -31,7 +41,7 @@ class DataGenerator(keras.utils.Sequence):
         y = np.empty((self.batch_size), dtype=int)
 
         for i, ID in enumerate(list_IDs_temp):
-            X[i,] = cv2.imread(data_dir + ID)
+            X[i,] = self.datagen.random_transform(cv2.imread(data_dir + ID))
             y[i] = self.labels[ID]
 
         return X, keras.utils.to_categorical(y, num_classes=self.n_classes)
@@ -53,7 +63,7 @@ class DataGenerator(keras.utils.Sequence):
         'Denotes the number of batches per epoch'
         return int(np.floor(len(self.list_IDs) / self.batch_size))
 
-def get_labels(path=data_dir, class_ids=class_ids):
+def get_labels(path=data_dir, class_ids=class_ids, unbaised=True):
     """
     Returns a dict of _keys_ to _labels_ where the _labels_ are the top-level
     dir names in `path` and the _keys_ are the relative filenames from `path`.
