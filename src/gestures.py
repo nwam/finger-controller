@@ -2,20 +2,20 @@
 This module translates information about the hand into gestures.
 
 Usage:
-hand = Hand()
+    hand = Hand()
 
-while True:
-    # ...
-    # get info about hand
-    # ...
+    while True:
+        # ...
+        # get info about hand
+        # ...
 
-    hand.position = position
-    hand.leg_speed = leg_speed
-    hand.check_cooldowns()
+        hand.position = position
+        hand.leg_speed = leg_speed
+        hand.check_cooldowns()
 
-    if Gesture.RUN in hand.gestures:
-        # Press run button
-    # ...
+        if Gesture.RUN in hand.gestures:
+            # Press run button
+        # ...
 """
 from enum import Enum
 import time

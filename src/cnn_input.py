@@ -1,3 +1,16 @@
+"""
+CnnInput is a class that, given video frames, creates input frames for the CNN.
+
+CnnInput uses computer vision (optical flow and mhi) to create a frame that
+provides the neural network sufficient information for understanding the
+gesture's movement over the past short period of time.
+
+Usage:
+    cnn_input = CnnInput(capture.read())
+    while True:
+        cnn_input.update(capture.read())
+        print(cnn_input.frame) # holds the updated input for the CNN
+"""
 import cv2
 import numpy as np
 import dataset

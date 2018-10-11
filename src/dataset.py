@@ -1,3 +1,16 @@
+"""
+This module holds various constants, functions, and a class for handling the
+dataset.
+
+Usage:
+    train_gen, validation_gen = get_generators()
+
+Important constants:
+    input_shape: A tuple holding the shape of the input layer to the CNN.
+    class_ids: Unique IDs for each gesture.
+    is_to_class: Inverse of class_ids.
+    n_classes: The number of unique gestures.
+"""
 import keras.utils
 from keras.preprocessing.image import ImageDataGenerator
 import os
@@ -100,6 +113,7 @@ def partition_labels(labels, train=0.8):
     return partition
 
 def get_generators():
+    """ Creates and returns a train and test generators. """
     labels = get_labels()
     partition = partition_labels(labels)
 

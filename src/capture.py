@@ -7,36 +7,36 @@ video stream from a device on the same LAN) are used for actual finger-people
 use while video is useful for tests since you can retest with the same video.
 
 Usage:
-# First choose a capture source and type
-# Camera
-cap source = 0 # or another openCV camera ID
-cap_type = CapType.CAMERA
+    # First choose a capture source and type
+    # Camera
+    cap source = 0 # or another openCV camera ID
+    cap_type = CapType.CAMERA
 
-# Video: Local File
-cap_source = 'path/to/video/file'
-cap_type = CapType.VIDEO
+    # Video: Local File
+    cap_source = 'path/to/video/file'
+    cap_type = CapType.VIDEO
 
-# Video: Droidcam
-cap_source = 'http://user:machine@192.168.0.20:4747/mjpegfeed?320x240'
-cap_type = CapType.VIDEO
+    # Video: Droidcam
+    cap_source = 'http://user:machine@192.168.0.20:4747/mjpegfeed?320x240'
+    cap_type = CapType.VIDEO
 
-# Video: IpWebcam
-cap_source = 'http://192.168.0.34:8080/video'
-cap_type = CapType.VIDEO
+    # Video: IpWebcam
+    cap_source = 'http://192.168.0.34:8080/video'
+    cap_type = CapType.VIDEO
 
-# Web (Depreciated)
-cap_source = 'http://192.168.0.12:8080/shot.jpg'
-cap_type = CapType.WEB
+    # Web (Depreciated)
+    cap_source = 'http://192.168.0.12:8080/shot.jpg'
+    cap_type = CapType.WEB
 
 
-# Then create and use the Capture object
-cap = Capture(cap_source, cap_type)
+    # Then create and use the Capture object
+    cap = Capture(cap_source, cap_type)
 
-while cap.is_opened():
-    frame = cap.read()
-    # Do something with frame
+    while cap.is_opened():
+        frame = cap.read()
+        # Do something with frame
 
-cap.kill()
+    cap.kill()
 """
 
 import cv2

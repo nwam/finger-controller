@@ -1,3 +1,10 @@
+"""
+This module contains functions for building and training the CNN.
+
+Usage:
+    train()
+    # Model will be saved to 'checkpoints/'
+"""
 import numpy as np
 import pandas as pd
 import keras

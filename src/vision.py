@@ -1,3 +1,6 @@
+"""
+This module contains classes that perform computer vision alogirhtms.
+"""
 import cv2
 import numpy as np
 
