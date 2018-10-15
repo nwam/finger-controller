@@ -13,6 +13,12 @@ GameInput.stop_move()
 GameInput.kick()
 """
 import subprocess
+import enum
+import time
+
+class Direction(enum.Enum):
+    LEFT = 0
+    RIGHT = 1
 
 class GameInput:
     KEY_A = 'f'
@@ -24,6 +30,8 @@ class GameInput:
     KEY_D = 'Down'
 
     TAP_TIME = 1/30 # seconds
+
+    enabled = False
 
     @staticmethod
     def keydown(key):
@@ -73,5 +81,20 @@ class GameInput:
     @classmethod
     def kick(cls):
         cls.keydown(cls.KEY_B)
-        time.sleep(TAP_TIME)
+        time.sleep(cls.TAP_TIME)
         cls.keyup(cls.KEY_B)
+
+    @classmethod
+    def do(cls, action):
+        if not cls.enabled:
+            pass
+        elif action == 'stand':
+            cls.stop_move()
+        elif action == 'run' or action == 'walk':
+            cls.walk()
+        elif action == 'jump':
+            cls.jump()
+        elif action == 'down_jump':
+            pass
+        elif action == 'kick':
+            cls.kick()

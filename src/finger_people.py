@@ -5,6 +5,7 @@ import numpy as np
 from capture import Capture, CapType
 from cnn_input import CnnInput
 import dataset
+from game_input import GameInput
 
 cap_source_template = 'http://192.168.0.{}:8080/video'
 
@@ -32,6 +33,9 @@ def finger_people(model_path, cap_source, cap_type):
         if class_label == 'walk':
             class_label = 'run'
 
+        ''' GAME INPUT '''
+        GameInput.do(class_label)
+
         ''' OUTPUT / DEBUG '''
         cnn_input_show = cv2.resize(cnn_input.frame, (h,h))
         cv2.putText(frame, class_label, (2, h-3), cv2.FONT_HERSHEY_DUPLEX, 0.5, (0,255,0))
@@ -41,6 +45,8 @@ def finger_people(model_path, cap_source, cap_type):
         key = cv2.waitKey(2) & 0xFF
         if key == ord('q'):
             break
+        if key == ord('g'):
+            GameInput.enabled = not GameInput.enabled
 
     cap.kill()
 
