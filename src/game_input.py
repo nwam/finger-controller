@@ -14,7 +14,8 @@ game_input.walk(direction)
 game_input.stop_move()
 game_input.kick()
 """
-import subprocess
+import pynput
+from pynput.keyboard import Key as PKey
 import enum
 import time
 import threading
@@ -23,7 +24,7 @@ class Direction(enum.Enum):
     LEFT = 0
     RIGHT = 1
 
-class Keys(enum.Enum):
+class Key(enum.Enum):
     A = 0
     B = 1
     LEFT = 10
@@ -33,63 +34,64 @@ class Keys(enum.Enum):
 
 class GameInput:
 
-    def __init__(self, tap_time=1/30, key_a='f', key_b='d', key_l='Left',
-            key_r='Right', key_u='Up', key_d='Down', enabled=False):
+    def __init__(self, tap_time=1/30, key_a='f', key_b='d', key_l=PKey.left,
+            key_r=PKey.right, key_u=PKey.up, key_d=PKey.down, enabled=False):
         self.keys = {}
-        self.keys[Keys.A] = key_a
-        self.keys[Keys.B] = key_b
-        self.keys[Keys.LEFT] = key_l
-        self.keys[Keys.RIGHT] = key_r
-        self.keys[Keys.UP] = key_u
-        self.keys[Keys.DOWN] = key_d
-        self.states = dict([(key, False) for key in self.keys.keys()])
+        self.keys[Key.A] = key_a
+        self.keys[Key.B] = key_b
+        self.keys[Key.LEFT] = key_l
+        self.keys[Key.RIGHT] = key_r
+        self.keys[Key.UP] = key_u
+        self.keys[Key.DOWN] = key_d
+        self.pressed = dict([(key, False) for key in self.keys.keys()])
         self.tap_time = tap_time # seconds
         self.enabled = enabled
+        self.keyboard = pynput.keyboard.Controller()
 
     def keydown(self, key):
-        if not self.states[key]:
+        if not self.pressed[key]:
             # Linux only
-            subprocess.run(['xte', 'keydown {}'.format(self.keys[key])])
-        self.states[key] = True
+            self.keyboard.press(self.keys[key])
+        self.pressed[key] = True
 
     def keyup(self, key):
-        if self.states[key]:
+        if self.pressed[key]:
             # Linux only
-            subprocess.run(['xte', 'keyup {}'.format(self.keys[key])])
-        self.states[key] = False
+            self.keyboard.release(self.keys[key])
+        self.pressed[key] = False
 
     def walk(self, direction=None):
         if direction is Direction.LEFT:
-            self.keydown(Keys.LEFT)
-            self.keyup(Keys.RIGHT)
+            self.keydown(Key.LEFT)
+            self.keyup(Key.RIGHT)
         else:
-            self.keydown(Keys.RIGHT)
-            self.keyup(Keys.LEFT)
+            self.keydown(Key.RIGHT)
+            self.keyup(Key.LEFT)
 
     def run(self, direction=None):
-        self.keydown(Keys.B)
+        self.keydown(Key.B)
         if direction is Direction.LEFT:
-            self.keydown(Keys.LEFT)
+            self.keydown(Key.LEFT)
         else:
-            self.keydown(Keys.RIGHT)
+            self.keydown(Key.RIGHT)
 
     def stop_move(self):
-        self.keyup(Keys.LEFT)
-        self.keyup(Keys.RIGHT)
+        self.keyup(Key.LEFT)
+        self.keyup(Key.RIGHT)
 
     def stop_run(self):
-        self.keyup(Keys.B)
+        self.keyup(Key.B)
 
     def jump(self):
-        self.keydown(Keys.A)
+        self.keydown(Key.A)
 
     def stop_jump(self):
-        self.keyup(Keys.A)
+        self.keyup(Key.A)
 
     def kick(self):
-        self.keydown(Keys.B)
+        self.keydown(Key.B)
         time.sleep(self.tap_time)
-        self.keyup(Keys.B)
+        self.keyup(Key.B)
 
     def perform(self, action):
         if not self.enabled or action is None:
