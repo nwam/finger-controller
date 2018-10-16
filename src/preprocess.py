@@ -51,3 +51,6 @@ def preprocess(data_dir=data_dir):
                     break
 
             cap.kill()
+
+if __name__ == '__main__':
+    preprocess()

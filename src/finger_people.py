@@ -1,3 +1,10 @@
+"""
+This is the main loop of the controller.
+
+It reads video, passes it through the CNN, and performs an input action to the
+game based on the CNN's output.
+"""
+
 import cv2
 import keras
 import argparse
@@ -8,6 +15,7 @@ import dataset
 from game_input import GameInput
 
 cap_source_template = 'http://192.168.0.{}:8080/video'
+sticky_size = 1
 
 def finger_people(model_path, cap_source, cap_type):
     model = keras.models.load_model(model_path)
@@ -15,6 +23,10 @@ def finger_people(model_path, cap_source, cap_type):
 
     ret, first_frame = cap.read()
     cnn_input = CnnInput(first_frame)
+
+    action = None
+    prev_label = None
+    sticky = 0
 
     h = first_frame.shape[0]
 
@@ -33,12 +45,21 @@ def finger_people(model_path, cap_source, cap_type):
         if class_label == 'walk':
             class_label = 'run'
 
+        ''' STICKY OUTPUT '''
+        if class_label != prev_label:
+            sticky_i = 0
+        if sticky_i < sticky_size:
+            sticky_i += 1
+        else:
+            action = class_label
+        prev_label = class_label
+
         ''' GAME INPUT '''
-        GameInput.do(class_label)
+        GameInput.do(action)
 
         ''' OUTPUT / DEBUG '''
         cnn_input_show = cv2.resize(cnn_input.frame, (h,h))
-        cv2.putText(frame, class_label, (2, h-3), cv2.FONT_HERSHEY_DUPLEX, 0.5, (0,255,0))
+        cv2.putText(frame, action, (2, h-3), cv2.FONT_HERSHEY_DUPLEX, 0.5, (0,255,0))
         cv2.imshow('frame', np.hstack((frame, cnn_input_show)))
 
         ''' KEYBOARD INPUT '''

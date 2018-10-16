@@ -86,7 +86,7 @@ class GameInput:
 
     @classmethod
     def do(cls, action):
-        if not cls.enabled:
+        if not cls.enabled or action is None:
             pass
         elif action == 'stand':
             cls.stop_move()

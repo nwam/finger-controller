@@ -17,7 +17,7 @@ import dataset
 import vision
 
 class CnnInput:
-    def __init__(self, first_frame, edge_clip=3, mhi_alpha=0.50, debug=False):
+    def __init__(self, first_frame, edge_clip=3, mhi_alpha=0.25, debug=False):
         self.edge_clip = edge_clip
         self.original_shape = tuple([n + 2*self.edge_clip
                 for n in reversed(dataset.input_shape[:2])])
