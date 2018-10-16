@@ -20,6 +20,7 @@ sticky_size = 1
 def finger_people(model_path, cap_source, cap_type):
     model = keras.models.load_model(model_path)
     cap = Capture(cap_source, cap_type)
+    game_input = GameInput()
 
     ret, first_frame = cap.read()
     cnn_input = CnnInput(first_frame)
@@ -55,7 +56,7 @@ def finger_people(model_path, cap_source, cap_type):
         prev_label = class_label
 
         ''' GAME INPUT '''
-        GameInput.do(action)
+        game_input.do(action)
 
         ''' OUTPUT / DEBUG '''
         cnn_input_show = cv2.resize(cnn_input.frame, (h,h))
@@ -67,7 +68,7 @@ def finger_people(model_path, cap_source, cap_type):
         if key == ord('q'):
             break
         if key == ord('g'):
-            GameInput.enabled = not GameInput.enabled
+            game_input.enabled = not game_input.enabled
 
     cap.kill()
 

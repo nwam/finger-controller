@@ -6,11 +6,13 @@ NOTE: The gesture to input mapping is game independant,
 so this class may need to be restructured.
 
 Usage:
-GameInput.jump()
-GameInput.stop_jump()
-GameInput.walk(direction)
-GameInput.stop_move()
-GameInput.kick()
+game_input = GameInput()
+game_input.enabled = True
+game_input.jump()
+game_input.stop_jump()
+game_input.walk(direction)
+game_input.stop_move()
+game_input.kick()
 """
 import subprocess
 import enum
@@ -21,17 +23,19 @@ class Direction(enum.Enum):
     RIGHT = 1
 
 class GameInput:
-    KEY_A = 'f'
-    KEY_B = 'd'
 
-    KEY_L = 'Left'
-    KEY_R = 'Right'
-    KEY_U = 'Up'
-    KEY_D = 'Down'
+    def __init__(self, tap_time=1/30, key_a='f', key_b='d', key_l='Left',
+            key_r='Right', key_u='Up', key_d='Down'):
+        self.key_a = key_a
+        self.key_b = key_b
+        self.key_l = key_l
+        self.key_r = key_r
+        self.key_u = key_u
+        self.key_d = key_d
 
-    TAP_TIME = 1/30 # seconds
+        self.tap_time = tap_time # seconds
 
-    enabled = False
+        self.enabled = False
 
     @staticmethod
     def keydown(key):
@@ -41,60 +45,49 @@ class GameInput:
     def keyup(key):
         subprocess.run(['xte', 'keyup {}'.format(key)]) # Linux only
 
-
-    @classmethod
-    def walk(cls, direction=None):
+    def walk(self, direction=None):
         if direction is Direction.LEFT:
-            cls.keydown(cls.KEY_L)
-            cls.keyup(cls.KEY_R)
+            GameInput.keydown(self.key_l)
+            GameInput.keyup(self.key_r)
         else:
-            cls.keydown(cls.KEY_R)
-            cls.keyup(cls.KEY_L)
+            GameInput.keydown(self.key_r)
+            GameInput.keyup(self.key_l)
 
-    @classmethod
-    def run(cls, direction=None):
-        cls.keydown(cls.KEY_B)
+    def run(self, direction=None):
+        GameInput.keydown(self.key_b)
         if direction is Direction.LEFT:
-            cls.keydown(cls.KEY_L)
+            GameInput.keydown(self.key_l)
         else:
-            cls.keydown(cls.KEY_R)
+            GameInput.keydown(self.key_r)
 
-    @classmethod
-    def stop_move(cls):
-        cls.keyup(cls.KEY_L)
-        cls.keyup(cls.KEY_R)
+    def stop_move(self):
+        GameInput.keyup(self.key_l)
+        GameInput.keyup(self.key_r)
 
-    @classmethod
-    def stop_run(cls):
-        cls.keyup(cls.KEY_B)
+    def stop_run(self):
+        GameInput.keyup(self.key_b)
 
+    def jump(self):
+        GameInput.keydown(self.key_a)
 
-    @classmethod
-    def jump(cls):
-        cls.keydown(cls.KEY_A)
+    def stop_jump(self):
+        GameInput.keyup(self.key_a)
 
-    @classmethod
-    def stop_jump(cls):
-        cls.keyup(cls.KEY_A)
+    def kick(self):
+        GameInput.keydown(self.key_b)
+        time.sleep(self.tap_time)
+        GameInput.keyup(self.key_b)
 
-
-    @classmethod
-    def kick(cls):
-        cls.keydown(cls.KEY_B)
-        time.sleep(cls.TAP_TIME)
-        cls.keyup(cls.KEY_B)
-
-    @classmethod
-    def do(cls, action):
-        if not cls.enabled or action is None:
+    def do(self, action):
+        if not self.enabled or action is None:
             pass
         elif action == 'stand':
-            cls.stop_move()
+            self.stop_move()
         elif action == 'run' or action == 'walk':
-            cls.walk()
+            self.walk()
         elif action == 'jump':
-            cls.jump()
+            self.jump()
         elif action == 'down_jump':
             pass
         elif action == 'kick':
-            cls.kick()
+            self.kick()
