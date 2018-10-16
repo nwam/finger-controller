@@ -35,7 +35,8 @@ class Key(enum.Enum):
 class GameInput:
 
     def __init__(self, tap_time=1/30, key_a='f', key_b='d', key_l=PKey.left,
-            key_r=PKey.right, key_u=PKey.up, key_d=PKey.down, enabled=False):
+            key_r=PKey.right, key_u=PKey.up, key_d=PKey.down, enabled=False,
+            jump_cooldown=1.2):
         self.keys = {}
         self.keys[Key.A] = key_a
         self.keys[Key.B] = key_b
@@ -45,6 +46,7 @@ class GameInput:
         self.keys[Key.DOWN] = key_d
         self.pressed = dict([(key, False) for key in self.keys.keys()])
         self.tap_time = tap_time # seconds
+        self.jump_cooldown = jump_cooldown
         self.enabled = enabled
         self.keyboard = pynput.keyboard.Controller()
 
@@ -84,6 +86,8 @@ class GameInput:
 
     def jump(self):
         self.keydown(Key.A)
+        time.sleep(self.jump_cooldown)
+        self.stop_jump()
 
     def stop_jump(self):
         self.keyup(Key.A)
