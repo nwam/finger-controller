@@ -36,7 +36,7 @@ class GameInput:
 
     def __init__(self, tap_time=1/30, key_a='f', key_b='d', key_l=PKey.left,
             key_r=PKey.right, key_u=PKey.up, key_d=PKey.down, enabled=False,
-            jump_cooldown=1.2):
+            jump_cooldown=0.8):
         self.keys = {}
         self.keys[Key.A] = key_a
         self.keys[Key.B] = key_b
@@ -45,22 +45,30 @@ class GameInput:
         self.keys[Key.UP] = key_u
         self.keys[Key.DOWN] = key_d
         self.pressed = dict([(key, False) for key in self.keys.keys()])
+
+        self.enabled = enabled
         self.tap_time = tap_time # seconds
         self.jump_cooldown = jump_cooldown
-        self.enabled = enabled
+        self.jump_id = 0
+
         self.keyboard = pynput.keyboard.Controller()
+        self.threads = []
 
     def keydown(self, key):
+        pressed = False
         if not self.pressed[key]:
-            # Linux only
             self.keyboard.press(self.keys[key])
+            pressed = True
         self.pressed[key] = True
+        return pressed
 
     def keyup(self, key):
+        released = False
         if self.pressed[key]:
-            # Linux only
             self.keyboard.release(self.keys[key])
+            released = True
         self.pressed[key] = False
+        return released
 
     def walk(self, direction=None):
         if direction is Direction.LEFT:
@@ -85,12 +93,17 @@ class GameInput:
         self.keyup(Key.B)
 
     def jump(self):
-        self.keydown(Key.A)
-        time.sleep(self.jump_cooldown)
-        self.stop_jump()
+        pressed = self.keydown(Key.A)
+
+        if pressed:
+            self.jump_id = threading.get_ident()
+            time.sleep(self.jump_cooldown)
+            if self.jump_id == threading.get_ident():
+                self.stop_jump()
 
     def stop_jump(self):
         self.keyup(Key.A)
+        self.jump_id = threading.get_ident()
 
     def kick(self):
         self.keydown(Key.B)
@@ -112,4 +125,6 @@ class GameInput:
             self.kick()
 
     def do(self, action):
-        threading.Thread(target=self.perform, args=(action,)).start()
+        t = threading.Thread(target=self.perform, args=(action,))
+        self.threads.append(t)
+        t.start()
