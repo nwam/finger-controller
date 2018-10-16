@@ -17,68 +17,81 @@ game_input.kick()
 import subprocess
 import enum
 import time
+import threading
 
 class Direction(enum.Enum):
     LEFT = 0
     RIGHT = 1
 
+class Keys(enum.Enum):
+    A = 0
+    B = 1
+    LEFT = 10
+    RIGHT = 11
+    UP = 12
+    DOWN = 13
+
 class GameInput:
 
     def __init__(self, tap_time=1/30, key_a='f', key_b='d', key_l='Left',
-            key_r='Right', key_u='Up', key_d='Down'):
-        self.key_a = key_a
-        self.key_b = key_b
-        self.key_l = key_l
-        self.key_r = key_r
-        self.key_u = key_u
-        self.key_d = key_d
-
+            key_r='Right', key_u='Up', key_d='Down', enabled=False):
+        self.keys = {}
+        self.keys[Keys.A] = key_a
+        self.keys[Keys.B] = key_b
+        self.keys[Keys.LEFT] = key_l
+        self.keys[Keys.RIGHT] = key_r
+        self.keys[Keys.UP] = key_u
+        self.keys[Keys.DOWN] = key_d
+        self.states = dict([(key, False) for key in self.keys.keys()])
         self.tap_time = tap_time # seconds
+        self.enabled = enabled
 
-        self.enabled = False
+    def keydown(self, key):
+        if not self.states[key]:
+            # Linux only
+            subprocess.run(['xte', 'keydown {}'.format(self.keys[key])])
+        self.states[key] = True
 
-    @staticmethod
-    def keydown(key):
-        subprocess.run(['xte', 'keydown {}'.format(key)]) # Linux only
-
-    @staticmethod
-    def keyup(key):
-        subprocess.run(['xte', 'keyup {}'.format(key)]) # Linux only
+    def keyup(self, key):
+        if self.states[key]:
+            # Linux only
+            subprocess.run(['xte', 'keyup {}'.format(self.keys[key])])
+        self.states[key] = False
 
     def walk(self, direction=None):
         if direction is Direction.LEFT:
-            GameInput.keydown(self.key_l)
-            GameInput.keyup(self.key_r)
+            self.keydown(Keys.LEFT)
+            self.keyup(Keys.RIGHT)
         else:
-            GameInput.keydown(self.key_r)
-            GameInput.keyup(self.key_l)
+            self.keydown(Keys.RIGHT)
+            self.keyup(Keys.LEFT)
 
     def run(self, direction=None):
-        GameInput.keydown(self.key_b)
+        self.keydown(Keys.B)
         if direction is Direction.LEFT:
-            GameInput.keydown(self.key_l)
+            self.keydown(Keys.LEFT)
         else:
-            GameInput.keydown(self.key_r)
+            self.keydown(Keys.RIGHT)
 
     def stop_move(self):
-        GameInput.keyup(self.key_l)
-        GameInput.keyup(self.key_r)
+        self.keyup(Keys.LEFT)
+        self.keyup(Keys.RIGHT)
 
     def stop_run(self):
-        GameInput.keyup(self.key_b)
+        self.keyup(Keys.B)
 
     def jump(self):
-        GameInput.keydown(self.key_a)
+        self.keydown(Keys.A)
 
     def stop_jump(self):
-        GameInput.keyup(self.key_a)
+        self.keyup(Keys.A)
 
     def kick(self):
-        GameInput.keydown(self.key_b)
+        self.keydown(Keys.B)
         time.sleep(self.tap_time)
-        GameInput.keyup(self.key_b)
+        self.keyup(Keys.B)
 
-    def do(self, action):
+    def perform(self, action):
         if not self.enabled or action is None:
             pass
         elif action == 'stand':
@@ -91,3 +104,6 @@ class GameInput:
             pass
         elif action == 'kick':
             self.kick()
+
+    def do(self, action):
+        threading.Thread(target=self.perform, args=(action,)).start()
