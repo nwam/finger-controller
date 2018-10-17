@@ -20,11 +20,12 @@ import numpy as np
 import cv2
 from collections import defaultdict
 
-data_dir = '../data/preprocessed/'
 input_shape = (28, 28, 3)
 class_ids = {'stand': 0, 'walk': 1, 'run': 2, 'jump': 3, 'kick': 4}
 id_to_class = dict([(v,k) for k,v in class_ids.items()])
 n_classes = len(class_ids)
+data_dir = '../data/preprocessed/'
+bundles_path = os.path.join(data_dir, 'bundles.pickle')
 
 class DataGenerator(keras.utils.Sequence):
     def __init__(self, list_IDs, labels, data_dir=data_dir, batch_size=32,

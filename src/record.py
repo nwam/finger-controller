@@ -6,64 +6,93 @@ Usage:
 
         $ python record.py 124
 
-    to record from IP Webcam at http://192.168.0.124:8080/video then
-      - press r to toggle recording and
-      - press f to record a single frame.
+    to record from IP Webcam at http://192.168.0.124:8080/video. Actions will
+    be displayed on-screen along side the video source. Press f to record the
+    current Recording.
 """
 import argparse
 import time
 import pickle
+import enum
 import os
 import cv2
 import numpy as np
 from capture import Capture, CapType
 from cnn_input import CnnInput
 
-def record(cap_source, cap_type, max_frames=300, output_dir='../data/'):
-    gesture_name = 'kick'
+class RecMode(enum.Enum):
+    BEFORE = 0
+    MIDDLE = 1
+    AFTER = 2
 
+class Recording:
+    def __init__(self, label, text, rec_mode, n_frames):
+        self.label = label
+        self.text = text
+        self.rec_mode = rec_mode
+        self.n_frames = n_frames
+        self.frame = None
+
+    def get_frames(self):
+        if self.rec_mode == RecMode.AFTER:
+            return list(range(self.frame, self.frame+self.n_frames))
+        elif self.rec_mode == RecMode.MIDDLE:
+            half = self.n_frames // 2
+            return list(range(self.frame-half, self.frame+half+1))
+        elif self.rec_mode == RecMode.BEFORE:
+            return list(range(self.frame-self.n_frames, self.frame))
+
+
+def record(cap_source, cap_type, recordings, output_dir='../data/'):
     cap = Capture(cap_source, cap_type)
-    recorded_frames = set()
     output_prefix = os.path.join(output_dir,
-            '{}-{}'.format(gesture_name, str(time.time())))
+            str(time.time()))
     output_path = output_prefix + '.avi'
     output_pickle = output_prefix + '.pickle'
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
     out = cv2.VideoWriter(output_path, fourcc, 30.0, (160,120))
 
-    n_frames = 0
-    record = False
+    frame_i = 0
+    rec_i = 0
+    record_n = 0
     first_frame = cap.read()[1]
     cnn_input = CnnInput(first_frame)
     h = first_frame.shape[0]
 
-    while cap.is_opened() and len(recorded_frames) < max_frames:
+    while cap.is_opened() and (rec_i < len(recordings) or record_n <= 0):
         ret, frame = cap.read()
         if ret == False:
             break
+        frame_i += 1
 
         out.write(frame)
 
-        if record:
-            recorded_frames.add(n_frames)
+        if record_n > 0:
             cv2.circle(frame, (6,6), (5), (0,0,255), cv2.FILLED)
-        n_frames += 1
+            record_n -= 1
 
         cnn_input.update(frame)
         cnn_input_show = cv2.resize(cnn_input.frame, (h,h))
+        if rec_i < len(recordings):
+            cv2.putText(frame, recordings[rec_i].text, (2, h-3),
+                    cv2.FONT_HERSHEY_DUPLEX, 0.5, (0,255,0))
         cv2.imshow('frame', np.hstack((frame, cnn_input_show)))
 
         key = cv2.waitKey(3) & 0xFF
         if key == ord('q'):
             break
-        if key == ord('r'):
-            record = not record
-        if key == ord('f') and not record:
-            recorded_frames.add(n_frames)
-            cv2.circle(frame, (6,6), (5), (45,210,45), cv2.FILLED)
+        if key == ord('f') and record_n <= 0:
+            recordings[rec_i].frame = frame_i
+            if recordings[rec_i].rec_mode == RecMode.AFTER:
+                record_n = recordings[rec_i].n_frames
+            elif recordings[rec_i].rec_mode == RecMode.MIDDLE:
+                record_n = recordings[rec_i].n_frames // 2
+            else:
+                record_n = 1
+            rec_i += 1
 
 
-    pickle.dump(recorded_frames, open(output_pickle, 'wb'))
+    pickle.dump(recordings, open(output_pickle, 'wb'))
     cap.kill()
 
 if __name__ == '__main__':
@@ -85,5 +114,12 @@ if __name__ == '__main__':
     elif cap_type == 'camera':
         cap_type = CapType.CAMERA
 
+    recordings = []
+    recordings.append(Recording('run', 'run front close', RecMode.AFTER, 9))
+    recordings.append(Recording('run', 'run ->mid', RecMode.AFTER, 9))
+    recordings.append(Recording('run', 'run mid', RecMode.AFTER, 9))
+    recordings.append(Recording('kick', 'kick', RecMode.MIDDLE, 9))
+    recordings.append(Recording('run', 'run ->back', RecMode.AFTER, 9))
+    recordings.append(Recording('run', 'run back', RecMode.AFTER, 9))
 
-    record(cap_source, cap_type)
+    record(cap_source, cap_type, recordings)
