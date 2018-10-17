@@ -14,7 +14,6 @@ from cnn_input import CnnInput
 import dataset
 from game_input import GameInput
 
-cap_source_template = 'http://192.168.0.{}:8080/video'
 sticky_size = 1
 
 def finger_people(model_path, cap_source, cap_type):
@@ -85,6 +84,7 @@ if __name__ == '__main__':
     model_path = args.model
 
     cap_source = args.cap_source
+    cap_source_template = 'http://192.168.0.{}:8080/video'
     if args.cap_source.isdigit():
         cap_source = cap_source_template.format(str(args.cap_source))
 
