@@ -1,3 +1,15 @@
+"""
+This module is used to simultaneously record and label data.
+
+Usage:
+    Run
+
+        $ python record.py 124
+
+    to record from IP Webcam at http://192.168.0.124:8080/video then
+      - press r to toggle recording and
+      - press f to record a single frame.
+"""
 import argparse
 import time
 import pickle

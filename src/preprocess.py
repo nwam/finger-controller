@@ -1,3 +1,13 @@
+"""
+This modules reads recorded videos, computes the CnnInput of each frame and
+writes only labeled frames' CnnInput to their appropriate directories.
+
+Usage:
+        $ python preprocess.py
+
+    The preprocessed data will be saved in ../data/preprocessed/
+"""
+
 import os
 import pickle
 import cv2

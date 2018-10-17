@@ -3,6 +3,14 @@ This is the main loop of the controller.
 
 It reads video, passes it through the CNN, and performs an input action to the
 game based on the CNN's output.
+
+Usage:
+    Run
+
+        python finger_people.py models/best_model.hdf5 124
+
+    to record from IP Webcam at http://192.168.0.124:8080/video then
+    start a game and press g to enable keyboard inputs from finger_people.
 """
 
 import cv2
