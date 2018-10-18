@@ -13,35 +13,12 @@ Usage:
 import argparse
 import time
 import pickle
-import enum
 import os
 import cv2
 import numpy as np
 from capture import Capture, CapType
 from cnn_input import CnnInput
-
-class RecMode(enum.Enum):
-    BEFORE = 0
-    MIDDLE = 1
-    AFTER = 2
-
-class Recording:
-    def __init__(self, label, text, rec_mode, n_frames):
-        self.label = label
-        self.text = text
-        self.rec_mode = rec_mode
-        self.n_frames = n_frames
-        self.frame = None
-
-    def get_frames(self):
-        if self.rec_mode == RecMode.AFTER:
-            return list(range(self.frame, self.frame+self.n_frames))
-        elif self.rec_mode == RecMode.MIDDLE:
-            half = self.n_frames // 2
-            return list(range(self.frame-half, self.frame+half+1))
-        elif self.rec_mode == RecMode.BEFORE:
-            return list(range(self.frame-self.n_frames, self.frame))
-
+import recording
 
 def record(cap_source, cap_type, recordings, output_dir='../data/'):
     cap = Capture(cap_source, cap_type)
@@ -59,7 +36,7 @@ def record(cap_source, cap_type, recordings, output_dir='../data/'):
     cnn_input = CnnInput(first_frame)
     h = first_frame.shape[0]
 
-    while cap.is_opened() and (rec_i < len(recordings) or record_n <= 0):
+    while cap.is_opened() and (rec_i < len(recordings) or record_n+1 > 0):
         ret, frame = cap.read()
         if ret == False:
             break
@@ -67,14 +44,14 @@ def record(cap_source, cap_type, recordings, output_dir='../data/'):
 
         out.write(frame)
 
-        if record_n > 0:
+        if record_n+1 > 0:
             cv2.circle(frame, (6,6), (5), (0,0,255), cv2.FILLED)
             record_n -= 1
 
         cnn_input.update(frame)
         cnn_input_show = cv2.resize(cnn_input.frame, (h,h))
         if rec_i < len(recordings):
-            cv2.putText(frame, recordings[rec_i].text, (2, h-3),
+            cv2.putText(frame, recordings[rec_i].info, (2, h-3),
                     cv2.FONT_HERSHEY_DUPLEX, 0.5, (0,255,0))
         cv2.imshow('frame', np.hstack((frame, cnn_input_show)))
 
@@ -83,14 +60,13 @@ def record(cap_source, cap_type, recordings, output_dir='../data/'):
             break
         if key == ord('f') and record_n <= 0:
             recordings[rec_i].frame = frame_i
-            if recordings[rec_i].rec_mode == RecMode.AFTER:
+            if recordings[rec_i].rec_mode == recording.RecMode.AFTER:
                 record_n = recordings[rec_i].n_frames
-            elif recordings[rec_i].rec_mode == RecMode.MIDDLE:
+            elif recordings[rec_i].rec_mode == recording.RecMode.MIDDLE:
                 record_n = recordings[rec_i].n_frames // 2
             else:
                 record_n = 1
             rec_i += 1
-
 
     pickle.dump(recordings, open(output_pickle, 'wb'))
     cap.kill()
@@ -114,12 +90,5 @@ if __name__ == '__main__':
     elif cap_type == 'camera':
         cap_type = CapType.CAMERA
 
-    recordings = []
-    recordings.append(Recording('run', 'run front close', RecMode.AFTER, 9))
-    recordings.append(Recording('run', 'run ->mid', RecMode.AFTER, 9))
-    recordings.append(Recording('run', 'run mid', RecMode.AFTER, 9))
-    recordings.append(Recording('kick', 'kick', RecMode.MIDDLE, 9))
-    recordings.append(Recording('run', 'run ->back', RecMode.AFTER, 9))
-    recordings.append(Recording('run', 'run back', RecMode.AFTER, 9))
-
+    recordings = recording.generate_sequence()
     record(cap_source, cap_type, recordings)

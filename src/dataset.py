@@ -77,7 +77,7 @@ class DataGenerator(keras.utils.Sequence):
         'Denotes the number of batches per epoch'
         return int(np.floor(len(self.list_IDs) / self.batch_size))
 
-def get_labels(path=data_dir, class_ids=class_ids, unbaised=True):
+def get_labels(path=data_dir, class_ids=class_ids):
     """
     Returns a dict of _keys_ to _labels_ where the _labels_ are the top-level
     dir names in `path` and the _keys_ are the relative filenames from `path`.

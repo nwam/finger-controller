@@ -22,11 +22,9 @@ import pickle
 import cv2
 from capture import Capture, CapType
 from cnn_input import CnnInput
-import dataset
-from record import Recording, RecMode
+from recording import Recording, RecMode, gestures
 
 data_dir = '../data/'
-gestures = set(dataset.class_ids.keys())
 
 def preprocess(data_dir=data_dir):
     ftype = '.png'
@@ -69,7 +67,7 @@ def preprocess(data_dir=data_dir):
             # Move to the next Recording object
             if recf_i >= len(rec_frames):
                 recf_i = 0
-                while rec_frames[recf_i] < frames_i:
+                while rec_frames[recf_i] < frames_i and rec_i < len(recordings) - 1:
                     rec_i += 1
                     rec_frames = recordings[rec_i].get_frames()
                     output_dir = os.path.join(
