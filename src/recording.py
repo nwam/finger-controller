@@ -8,6 +8,14 @@ import enum
 gestures = ['stand', 'walk', 'run', 'jump', 'jumpd', 'kick', 'duck', 'movef',
         'moveb']
 
+class CamSide(enum.Enum):
+    LEFT = 0
+    RIGHT = 1
+
+class CamProps:
+    def __init__(self, side):
+        self.side = side
+
 class RecMode(enum.Enum):
     BEFORE = 0
     MIDDLE = 1

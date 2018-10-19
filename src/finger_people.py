@@ -21,10 +21,11 @@ from capture import Capture, CapType
 from cnn_input import CnnInput
 import dataset
 from game_input import GameInput
+from recording import CamSide, CamProps
 
 sticky_size = 1
 
-def finger_people(model_path, cap_source, cap_type):
+def finger_people(model_path, cap_source, cap_type, cam_props):
     model = keras.models.load_model(model_path)
     cap = Capture(cap_source, cap_type)
     game_input = GameInput()
@@ -42,6 +43,8 @@ def finger_people(model_path, cap_source, cap_type):
         ret, frame = cap.read()
         if not ret:
             break
+        if cam_props.side == CamSide.LEFT:
+            frame = cv2.flip(frame, 1)
 
         ''' CNN '''
         cnn_input.update(frame)
@@ -83,6 +86,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('model', type=str,
             help='Path to gesture recognition .hdf5 keras model')
+    parser.add_argument('camera_side', type'str',
+            help='The side of the user where the camera is placed')
     parser.add_argument('cap_source', type=str,
             help='The source of the Capture object.')
     parser.add_argument('cap_type', nargs='*', default=['video'],
@@ -90,6 +95,15 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     model_path = args.model
+
+    cam_side = args.camera_side.lower()
+    if cam_side == 'left' or cam_side == 'l':
+        cam_side = CamSide.LEFT
+    elif cam_side == 'right' or cam_side == 'r':
+        cam_side = CamSide.RIGHT
+    else:
+        print('Invalid camera side. Please use l or r.')
+        exit()
 
     cap_source = args.cap_source
     cap_source_template = 'http://192.168.0.{}:8080/video'
@@ -102,5 +116,6 @@ if __name__ == '__main__':
     elif cap_type == 'camera':
         cap_type = CapType.CAMERA
 
+    cam_props = CamProps(cam_side)
 
-    finger_people(model_path, cap_source, cap_type)
+    finger_people(model_path, cap_source, cap_type, cam_props)

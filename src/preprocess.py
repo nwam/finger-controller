@@ -22,7 +22,7 @@ import pickle
 import cv2
 from capture import Capture, CapType
 from cnn_input import CnnInput
-from recording import Recording, RecMode, gestures
+from recording import Recording, RecMode, gestures, CamSide, CamProps
 
 data_dir = '../data/'
 
@@ -49,7 +49,7 @@ def preprocess(data_dir=data_dir):
         ret, first_frame = cap.read()
         cnn_input = CnnInput(first_frame, debug=True)
         if os.path.exists(pickle_file):
-            recordings = pickle.load(open(pickle_file, 'rb'))
+            cam_props, recordings = pickle.load(open(pickle_file, 'rb'))
 
         frames_i = 0
         rec_i = 0
@@ -61,6 +61,8 @@ def preprocess(data_dir=data_dir):
             ret, frame = cap.read()
             if not ret:
                 break
+            if cam_props.side == CamSide.LEFT:
+                frame = cv2.flip(frame, 1)
 
             cnn_input.update(frame)
 

@@ -16,11 +16,11 @@ import pickle
 import os
 import cv2
 import numpy as np
-from capture import Capture, CapType
+from capture import Capture, CapType, CamSide, CamProps
 from cnn_input import CnnInput
 import recording
 
-def record(cap_source, cap_type, recordings, output_dir='../data/'):
+def record(cap_source, cap_type, recordings, cam_props, output_dir='../data/'):
     cap = Capture(cap_source, cap_type)
     output_prefix = os.path.join(output_dir,
             str(time.time()))
@@ -68,16 +68,27 @@ def record(cap_source, cap_type, recordings, output_dir='../data/'):
                 record_n = 1
             rec_i += 1
 
-    pickle.dump(recordings, open(output_pickle, 'wb'))
+    pickle.dump((cam_props, recordings), open(output_pickle, 'wb'))
     cap.kill()
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
+    parser.add_argument('camera_side', type'str',
+            help='The side of the user where the camera is placed')
     parser.add_argument('cap_source', type=str,
             help='The source of the Capture object.')
     parser.add_argument('cap_type', nargs='*', default=['video'],
             help='The type of the Capture device used as video input.')
     args = parser.parse_args()
+
+    cam_side = args.camera_side.lower()
+    if cam_side == 'left' or cam_side == 'l':
+        cam_side = CamSide.LEFT
+    elif cam_side == 'right' or cam_side == 'r':
+        cam_side = CamSide.RIGHT
+    else:
+        print('Invalid camera side. Please use l or r.')
+        exit()
 
     cap_source = args.cap_source
     cap_source_template = 'http://192.168.0.{}:8080/video'
@@ -91,4 +102,6 @@ if __name__ == '__main__':
         cap_type = CapType.CAMERA
 
     recordings = recording.generate_sequence()
-    record(cap_source, cap_type, recordings)
+    cam_props = CamProps(cam_side)
+
+    record(cap_source, cap_type, recordings, cam_props)
