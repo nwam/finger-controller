@@ -86,7 +86,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('model', type=str,
             help='Path to gesture recognition .hdf5 keras model')
-    parser.add_argument('camera_side', type'str',
+    parser.add_argument('camera_side', type=str,
             help='The side of the user where the camera is placed')
     parser.add_argument('cap_source', type=str,
             help='The source of the Capture object.')
