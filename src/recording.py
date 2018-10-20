@@ -35,7 +35,7 @@ class Recording:
         n_frames: how many frames we want to keep
         frame: the "recorded" frame
     """
-    def __init__(self, label, info, rec_mode=RecMode.AFTER, n_frames=9):
+    def __init__(self, label, info, rec_mode=RecMode.AFTER, n_frames=7):
         self.label = label
         self.info = info
         self.rec_mode = rec_mode

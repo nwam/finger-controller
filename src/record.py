@@ -16,9 +16,10 @@ import pickle
 import os
 import cv2
 import numpy as np
-from capture import Capture, CapType, CamSide, CamProps
+from capture import Capture, CapType
 from cnn_input import CnnInput
 import recording
+from recording import CamSide, CamProps
 
 def record(cap_source, cap_type, recordings, cam_props, output_dir='../data/'):
     cap = Capture(cap_source, cap_type)
@@ -73,7 +74,7 @@ def record(cap_source, cap_type, recordings, cam_props, output_dir='../data/'):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('camera_side', type'str',
+    parser.add_argument('camera_side', type=str,
             help='The side of the user where the camera is placed')
     parser.add_argument('cap_source', type=str,
             help='The source of the Capture object.')
