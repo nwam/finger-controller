@@ -52,7 +52,7 @@ def finger_people(model_path, cap_source, cap_type, cam_props):
         prediction = model.predict(cnn_input_4d)
 
         class_id = np.argmax(prediction)
-        class_label = dataset.id_to_class[class_id]
+        class_label = dataset.id_to_gesture[class_id]
         if class_label == 'walk':
             class_label = 'run'
 

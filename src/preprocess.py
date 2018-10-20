@@ -26,6 +26,7 @@ from recording import Recording, RecMode, gestures, CamSide, CamProps
 
 data_dir = '../data/'
 
+
 def preprocess(data_dir=data_dir):
     ftype = '.png'
     output_dir_prefix = os.path.join(data_dir, 'preprocessed')
@@ -56,6 +57,7 @@ def preprocess(data_dir=data_dir):
         recf_i = 0
         rec_frames = recordings[rec_i].get_frames()
         output_dir = os.path.join(output_dir_prefix, recordings[rec_i].label)
+        label = None
 
         while cap.is_opened() and rec_i < len(recordings):
             ret, frame = cap.read()
@@ -82,7 +84,8 @@ def preprocess(data_dir=data_dir):
                         str(file_id), str(rec_i), str(recf_i), ftype)
                 output_path = os.path.join(output_dir, output_name)
                 cv2.imwrite(output_path, cnn_input.frame)
-                data[recordings[rec_i].label][-1].append(output_name)
+                data[recordings[rec_i].label][-1].append(
+                        os.path.join(recordings[rec_i].label, output_name))
                 recf_i += 1
 
             frames_i += 1

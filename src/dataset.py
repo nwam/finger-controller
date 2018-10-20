@@ -7,13 +7,14 @@ Usage:
 
 Important constants:
     input_shape: A tuple holding the shape of the input layer to the CNN.
-    class_ids: Unique IDs for each gesture.
-    is_to_class: Inverse of class_ids.
+    gesture_ids: Unique IDs for each gesture.
+    is_to_class: Inverse of gesture_ids.
     n_classes: The number of unique gestures.
 """
 import keras.utils
 from keras.preprocessing.image import ImageDataGenerator
 import os
+import pickle
 import random
 import copy
 import numpy as np
@@ -21,9 +22,10 @@ import cv2
 from collections import defaultdict
 
 input_shape = (28, 28, 3)
-class_ids = {'stand': 0, 'walk': 1, 'run': 2, 'jump': 3, 'kick': 4}
-id_to_class = dict([(v,k) for k,v in class_ids.items()])
-n_classes = len(class_ids)
+gesture_ids = {'stand': 0, 'walk': 1, 'run': 2, 'jump': 3, 'jumpd':4, 'kick': 5,
+        'duck':6, 'movef':7, 'moveb':8}
+id_to_gesture = dict([(v,k) for k,v in gesture_ids.items()])
+n_classes = len(gesture_ids)
 data_dir = '../data/preprocessed/'
 bundles_path = os.path.join(data_dir, 'bundles.pickle')
 
@@ -50,12 +52,12 @@ class DataGenerator(keras.utils.Sequence):
     def __data_generation(self, list_IDs_temp):
         """ Generates data containing batch_size samples """
         # X : (n_samples, *dim)
-
         X = np.empty((self.batch_size, *self.dim))
         y = np.empty((self.batch_size), dtype=int)
 
         for i, ID in enumerate(list_IDs_temp):
-            X[i,] = self.datagen.random_transform(cv2.imread(data_dir + ID))
+            path = os.path.join(self.data_dir, ID)
+            X[i,] = self.datagen.random_transform(cv2.imread(path))
             y[i] = self.labels[ID]
 
         return X, keras.utils.to_categorical(y, num_classes=self.n_classes)
@@ -77,46 +79,60 @@ class DataGenerator(keras.utils.Sequence):
         'Denotes the number of batches per epoch'
         return int(np.floor(len(self.list_IDs) / self.batch_size))
 
-def get_labels(path=data_dir, class_ids=class_ids):
+def get_bundles(path=bundles_path):
+    return pickle.load(open(bundles_path, 'rb'))
+
+def get_labels(bundles, gesture_ids=gesture_ids):
     """
-    Returns a dict of _keys_ to _labels_ where the _labels_ are the top-level
-    dir names in `path` and the _keys_ are the relative filenames from `path`.
+    Flattens and reverses bundles dict.
+
+    Args:
+        bundles: a dict labels to list of bundles of frames.
+        gesture_ids: a dict of labels to their ids
+
+    Returns:
+        labels: a dict of paths to their labels.
     """
     labels = {}
-    for root, dirs, files in os.walk(path):
-        for f in files:
-            rel_root = os.path.relpath(root, path)
-            rel_path = os.path.join(rel_root, f)
-            label = os.path.normpath(rel_root).split(os.sep)[0]
-            labels[rel_path] = class_ids[label]
+    for gesture in bundles:
+        for bundle in bundles[gesture]:
+            for path in bundle:
+                labels[path] = gesture_ids[gesture]
     return labels
 
-def partition_labels(labels, train=0.8):
+def partition_labels(bundles, train=0.8):
     """ Returns a random train/validation partition of labels' keys.
 
     Args:
-        labels: a dict of ids to labels.
+        bundles: a dict labels to list of bundles of frames.
         train: a number [0,1] specifying the percent of partition for train.
 
     Returns:
         partition: dictionary with 'train' and 'validation' keys, each
-            containing a list of keys from `labels`.
+            containing a list of keys from `bundles`.
     """
     partition = {}
+    partition['train'] = []
+    partition['validation'] = []
 
-    keys = list(labels.keys())
-    random.shuffle(keys)
-    split = int(train*len(keys))
+    for gesture in bundles:
+        random.shuffle(bundles[gesture])
+        split = int(train*len(bundles[gesture]))
 
-    partition['train'] = keys[:split]
-    partition['validation'] = keys[split:]
+        for i, bundle in enumerate(bundles[gesture]):
+            for path in bundle:
+                if i < split:
+                    partition['train'].append(path)
+                else:
+                    partition['validation'].append(path)
 
     return partition
 
 def get_generators():
     """ Creates and returns a train and test generators. """
-    labels = get_labels()
-    partition = partition_labels(labels)
+    bundles = get_bundles()
+    labels = get_labels(bundles)
+    partition = partition_labels(bundles)
 
     training_generator = DataGenerator(partition['train'], labels)
     validation_generator = DataGenerator(partition['validation'], labels)
