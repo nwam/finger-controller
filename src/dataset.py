@@ -41,12 +41,11 @@ class DataGenerator(keras.utils.Sequence):
         self.data_dir = data_dir
         self.on_epoch_end()
         self.datagen = ImageDataGenerator(
-                width_shift_range=0.4,
-                height_shift_range=0.4,
+                width_shift_range=0.2,
+                height_shift_range=0.2,
                 rescale=1/255,
-                shear_range=0.35,
-                zoom_range=0.35,
-                horizontal_flip=True,
+                shear_range=0.25,
+                zoom_range=0.15,
                 fill_mode='nearest')
 
     def __data_generation(self, list_IDs_temp):

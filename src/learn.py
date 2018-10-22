@@ -61,15 +61,19 @@ def train(saved_model=None):
         model.compile(loss='categorical_crossentropy',
                 optimizer='adam', metrics=['accuracy'])
     else:
-        model = keras.model.load_model(saved_model)
+        model = keras.models.load_model(saved_model)
+        #model.load_weights(saved_model)
 
     checkpoint_callback = ModelCheckpoint(os.path.join(checkpoints_dir,
-            'checkpoint-{epoch:02d}-{acc:.3f}.hdf5'))
+            'checkpoint-{epoch:02d}-{acc:.3f}.hdf5'),
+            save_best_only=True,
+            monitor='val_acc',
+            mode='max')
     tensrboard_callback = TensorBoard(log_dir='./tensorboard_logs')
 
     model.fit_generator(generator=training_generator,
                         validation_data=validation_generator,
-                        epochs=150,
+                        epochs=1000,
                         use_multiprocessing=True,
                         workers=6,
                         callbacks=[checkpoint_callback, tensrboard_callback])
@@ -86,4 +90,4 @@ if __name__ == '__main__':
     args = parser.parse_args()
     model = args.model
 
-    train()
+    train(model)
