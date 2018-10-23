@@ -45,6 +45,7 @@ def preprocess(data_dir=data_dir):
             continue
 
         input_file = os.path.join(data_dir, filename)
+        print('Processing {} ...'.format(input_file))
         pickle_file = '{}.pickle'.format(os.path.splitext(input_file)[0])
         cap = Capture(input_file, CapType.VIDEO)
         ret, first_frame = cap.read()
@@ -89,10 +90,6 @@ def preprocess(data_dir=data_dir):
                 recf_i += 1
 
             frames_i += 1
-
-            key = cv2.waitKey(2) & 0xFF
-            if key == ord('q'):
-                break
 
         file_id += 1
         cap.kill()
