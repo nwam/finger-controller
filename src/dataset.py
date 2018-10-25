@@ -22,8 +22,9 @@ import cv2
 from collections import defaultdict
 
 input_shape = (28, 28, 3)
-gesture_ids = {'stand': 0, 'walk': 1, 'run': 2, 'jump': 3, 'jumpd':4, 'kick': 5,
-        'duck':6, 'movef':7, 'moveb':8}
+gestures = ['stand', 'walk', 'run', 'jump', 'jumpd', 'kick', 'duck', 'movef',
+        'moveb']
+gesture_ids = dict([(gesture, i) for i, gesture in enumerate(gestures)])
 id_to_gesture = dict([(v,k) for k,v in gesture_ids.items()])
 n_classes = len(gesture_ids)
 data_dir = '../data/preprocessed/'
@@ -31,7 +32,8 @@ bundles_path = os.path.join(data_dir, 'bundles.pickle')
 
 class DataGenerator(keras.utils.Sequence):
     def __init__(self, list_IDs, labels, data_dir=data_dir, batch_size=32,
-                 dim=input_shape, n_classes=n_classes, shuffle=True):
+                 dim=input_shape, n_classes=n_classes, shuffle=True,
+                 datagen=None):
         self.dim = dim
         self.batch_size = batch_size
         self.labels = labels
@@ -40,13 +42,7 @@ class DataGenerator(keras.utils.Sequence):
         self.shuffle = shuffle
         self.data_dir = data_dir
         self.on_epoch_end()
-        self.datagen = ImageDataGenerator(
-                width_shift_range=0.2,
-                height_shift_range=0.2,
-                rescale=1/255,
-                shear_range=0.25,
-                zoom_range=0.15,
-                fill_mode='nearest')
+        self.datagen = datagen
 
     def __data_generation(self, list_IDs_temp):
         """ Generates data containing batch_size samples """
@@ -56,7 +52,9 @@ class DataGenerator(keras.utils.Sequence):
 
         for i, ID in enumerate(list_IDs_temp):
             path = os.path.join(self.data_dir, ID)
-            X[i,] = self.datagen.random_transform(cv2.imread(path))
+            X[i,] = cv2.imread(path)
+            if self.datagen:
+                X[i,] = self.datagen.random_transform(X[i,])
             y[i] = self.labels[ID]
 
         return X, keras.utils.to_categorical(y, num_classes=self.n_classes)
@@ -80,6 +78,13 @@ class DataGenerator(keras.utils.Sequence):
 
 def get_bundles(path=bundles_path):
     return pickle.load(open(bundles_path, 'rb'))
+
+def flatten_bundles(bundles):
+    flat_bundles = {}
+    for gesture in bundles:
+        flat_bundles[gesture] = \
+                [path for bundle in bundles[gesture] for path in bundle]
+    return flat_bundles
 
 def get_labels(bundles, gesture_ids=gesture_ids):
     """
@@ -133,7 +138,16 @@ def get_generators():
     labels = get_labels(bundles)
     partition = partition_labels(bundles)
 
-    training_generator = DataGenerator(partition['train'], labels)
+    datagen = ImageDataGenerator(
+                    width_shift_range=0.2,
+                    height_shift_range=0.2,
+                    rescale=1/255,
+                    shear_range=0.25,
+                    zoom_range=0.15,
+                    fill_mode='nearest')
+
+    training_generator = DataGenerator(partition['train'], labels,
+            datagen=datagen)
     validation_generator = DataGenerator(partition['validation'], labels)
 
     return training_generator, validation_generator
