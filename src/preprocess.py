@@ -10,7 +10,8 @@ Usage:
     The bundle data will be saved at ../data/preprocessed/bundles.pickle and
     will contain a structure of the format
 
-        {'kick': [['1-1-1.png', '1-1-2.png', ..], [..], ..], 'jump': .., ..}
+        {'kick': [['kick/1-1-1.png', 'kick/1-1-2.png', ..], [..], ..],
+                'jump': .., ..}
 
     which is a dictionary where each key is a gesture and each value is a list
     of bundles of paths to files of the same Recording. For example,

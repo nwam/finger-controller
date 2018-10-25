@@ -30,7 +30,7 @@ def build_model(input_shape=dataset.input_shape, n_classes=n_classes):
             input_shape=input_shape, activation='relu'))
     model.add(Conv2D(50, kernel_size=5, padding='valid', activation='relu'))
     model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
-    model.add(Dropout(0.33))
+    model.add(Dropout(0.65))
 
     model.add(Conv2D(70, kernel_size=3, padding='same', activation='relu'))
     model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
@@ -40,7 +40,7 @@ def build_model(input_shape=dataset.input_shape, n_classes=n_classes):
     model.add(Flatten())
     model.add(Dense(100))
     model.add(Activation('relu'))
-    model.add(Dropout(0.33))
+    model.add(Dropout(0.65))
 
     model.add(Dense(n_classes))
     model.add(Activation('softmax'))
@@ -65,7 +65,7 @@ def train(saved_model=None):
         #model.load_weights(saved_model)
 
     checkpoint_callback = ModelCheckpoint(os.path.join(checkpoints_dir,
-            'checkpoint-{epoch:02d}-{acc:.3f}.hdf5'),
+            'checkpoint-{epoch:02d}-{acc:.3f}v{val_acc:.3f}.hdf5'),
             save_best_only=True,
             monitor='val_acc',
             mode='max')
