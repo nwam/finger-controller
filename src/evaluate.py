@@ -1,3 +1,12 @@
+"""
+This module contains functions for evaluating trained models.
+
+Run
+
+    python evaluate.py model/amazing_model.hdf5
+
+to evaluate amazing_model.hdf5.
+"""
 import keras
 import numpy as np
 import cv2

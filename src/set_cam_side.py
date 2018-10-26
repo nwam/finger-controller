@@ -1,3 +1,7 @@
+"""
+This is a bandage module for fixing errors in recording data.
+All it does is set the camera side of a pickle from a recording session.
+"""
 import argparse
 import pickle
 from recording import CamSide, CamProps

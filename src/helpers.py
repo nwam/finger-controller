@@ -9,7 +9,7 @@ def imshow(img, title = ''):
     # hide the x and y axis for images
     plt.axis('off')
     # RGB images are actually BGR in OpenCV, so convert before displaying
-    if len(img.shape) == 3: 
+    if len(img.shape) == 3:
         plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
     # otherwise, assume it's grayscale and just display it
     else:
