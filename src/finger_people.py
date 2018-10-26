@@ -25,7 +25,7 @@ from recording import CamSide, CamProps
 
 sticky_size = 1
 
-def finger_people(model_path, cap_source, cap_type, cam_props):
+def finger_people(model_path, cap_source, cap_type, cam_props, record=None):
     model = keras.models.load_model(model_path)
     cap = Capture(cap_source, cap_type)
     game_input = GameInput()
@@ -38,6 +38,7 @@ def finger_people(model_path, cap_source, cap_type, cam_props):
     sticky = 0
 
     h = first_frame.shape[0]
+
 
     while cap.is_opened():
         ret, frame = cap.read()
@@ -71,7 +72,11 @@ def finger_people(model_path, cap_source, cap_type, cam_props):
         ''' OUTPUT / DEBUG '''
         cnn_input_show = cv2.resize(cnn_input.frame, (h,h))
         cv2.putText(frame, action, (2, h-3), cv2.FONT_HERSHEY_DUPLEX, 0.5, (0,255,0))
-        cv2.imshow('frame', np.hstack((frame, cnn_input_show)))
+        debug_frame = np.hstack((frame, cnn_input_show))
+        cv2.imshow('frame', debug_frame)
+
+        if record:
+            record.write(frame)
 
         ''' KEYBOARD INPUT '''
         key = cv2.waitKey(2) & 0xFF
@@ -92,6 +97,8 @@ if __name__ == '__main__':
             help='The source of the Capture object.')
     parser.add_argument('cap_type', nargs='*', default=['video'],
             help='The type of the Capture device used as video input.')
+    parser.add_argument('-r', '--record', action='store_true',
+            help='Flag to record the debug frames to rec.avi.')
     args = parser.parse_args()
 
     model_path = args.model
@@ -116,6 +123,12 @@ if __name__ == '__main__':
     elif cap_type == 'camera':
         cap_type = CapType.CAMERA
 
+    record = None
+    if args.record:
+        record_path = 'rec.avi'
+        fourcc = cv2.VideoWriter_fourcc(*'XVID')
+        record = cv2.VideoWriter(record_path, fourcc, 30.0, (160,120))
+
     cam_props = CamProps(cam_side)
 
-    finger_people(model_path, cap_source, cap_type, cam_props)
+    finger_people(model_path, cap_source, cap_type, cam_props, record)
