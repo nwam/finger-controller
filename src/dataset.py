@@ -22,8 +22,9 @@ import cv2
 from collections import defaultdict
 
 input_shape = (28, 28, 3)
-gestures = ['stand', 'walk', 'run', 'jump', 'jumpd', 'kick', 'duck', 'movef',
-        'moveb']
+#gestures = ['stand', 'walk', 'run', 'jump', 'jumpd', 'kick', 'duck', 'movef',
+#        'moveb']
+gestures = ['stand', 'run', 'jump', 'jumpd', 'kick', 'duck', 'movef', 'moveb']
 gesture_ids = dict([(gesture, i) for i, gesture in enumerate(gestures)])
 id_to_gesture = dict([(v,k) for k,v in gesture_ids.items()])
 n_classes = len(gesture_ids)
@@ -101,7 +102,8 @@ def get_labels(bundles, gesture_ids=gesture_ids):
     for gesture in bundles:
         for bundle in bundles[gesture]:
             for path in bundle:
-                labels[path] = gesture_ids[gesture]
+                if gesture in gestures:
+                    labels[path] = gesture_ids[gesture]
     return labels
 
 def partition_labels(bundles, train=0.8):
@@ -119,7 +121,7 @@ def partition_labels(bundles, train=0.8):
     partition['train'] = []
     partition['validation'] = []
 
-    for gesture in bundles:
+    for gesture in gestures:
         random.shuffle(bundles[gesture])
         split = int(train*len(bundles[gesture]))
 

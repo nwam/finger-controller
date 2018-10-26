@@ -9,6 +9,10 @@ Usage:
     to record from IP Webcam at http://192.168.0.124:8080/video. Actions will
     be displayed on-screen along side the video source. Press f to record the
     current Recording.
+
+    The video will be stored at a timestapped filed, and Recording data and
+    camera data will be stored at a file with the same name and a .pickle
+    extension.
 """
 import argparse
 import time
