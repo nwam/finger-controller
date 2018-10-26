@@ -23,7 +23,7 @@ import dataset
 from game_input import GameInput
 from recording import CamSide, CamProps
 
-sticky_size = 1
+sticky_size = 2
 
 def finger_people(model_path, cap_source, cap_type, cam_props, record=None):
     model = keras.models.load_model(model_path)
@@ -39,6 +39,12 @@ def finger_people(model_path, cap_source, cap_type, cam_props, record=None):
 
     h = first_frame.shape[0]
 
+    model_conv4 = keras.models.Model(inputs=model.input,
+            outputs=model.get_layer('conv2d_4').output)
+    model_conv3 = keras.models.Model(inputs=model.input,
+            outputs=model.get_layer('conv2d_3').output)
+    model_conv2 = keras.models.Model(inputs=model.input,
+            outputs=model.get_layer('conv2d_2').output)
 
     while cap.is_opened():
         ret, frame = cap.read()
@@ -54,8 +60,11 @@ def finger_people(model_path, cap_source, cap_type, cam_props, record=None):
 
         class_id = np.argmax(prediction)
         class_label = dataset.id_to_gesture[class_id]
-        if class_label == 'walk':
-            class_label = 'run'
+
+        ''' MIDDLE LAYERS '''
+        prediction4 = np.sum(model_conv4.predict(cnn_input_4d)[0], -1)
+        prediction3 = np.sum(model_conv3.predict(cnn_input_4d)[0], -1)
+        prediction2 = np.sum(model_conv2.predict(cnn_input_4d)[0], -1)
 
         ''' STICKY OUTPUT '''
         if class_label != prev_label:
@@ -72,7 +81,12 @@ def finger_people(model_path, cap_source, cap_type, cam_props, record=None):
         ''' OUTPUT / DEBUG '''
         cnn_input_show = cv2.resize(cnn_input.frame, (h,h))
         cv2.putText(frame, action, (2, h-3), cv2.FONT_HERSHEY_DUPLEX, 0.5, (0,255,0))
-        debug_frame = np.hstack((frame, cnn_input_show))
+
+        prediction4 = cv2.resize(cv2.cvtColor(prediction4//5, cv2.COLOR_GRAY2RGB), (h,h)).astype(np.uint8)
+        prediction3 = cv2.resize(cv2.cvtColor(prediction3//5, cv2.COLOR_GRAY2RGB), (h,h)).astype(np.uint8)
+        prediction2 = cv2.resize(cv2.cvtColor(prediction2//5, cv2.COLOR_GRAY2RGB), (h,h)).astype(np.uint8)
+
+        debug_frame = np.hstack((frame, cnn_input_show, prediction2, prediction3, prediction4))
         cv2.imshow('frame', debug_frame)
 
         if record:
