@@ -3,6 +3,7 @@ This module contains classes that perform computer vision alogirhtms.
 """
 import cv2
 import numpy as np
+import scipy.signal
 
 class OpticalFlow:
     """
@@ -15,7 +16,7 @@ class OpticalFlow:
         while True:
             frame = get_frame()
             flow.update(frame)
-            flow.flow_vis # returns a visualization of optical flow
+            flow.vis # returns a visualization of optical flow
     """
     # Parameters for farneback optical flow
     fb_params = dict(
@@ -32,7 +33,7 @@ class OpticalFlow:
         shape = frame.shape
         if frame.ndim == 2:
             shape = shape + (3,)
-        self.flow_vis = np.ones(shape, dtype=frame.dtype) * 255
+        self.hsv = np.ones(shape, dtype=frame.dtype) * 255
         self.prev = self._prepare_frame(frame)
 
     def update(self, frame):
@@ -48,10 +49,10 @@ class OpticalFlow:
         Computes an HSV representation of the optical flow and returns
         a BGR version of this.
         """
-        mag, ang = cv2.cartToPolar(self.flow[...,0], self.flow[...,1])
-        self.flow_vis[...,0] = ang*180/np.pi/2
-        self.flow_vis[...,2] = cv2.normalize(mag,None,0,255,cv2.NORM_MINMAX)
-        self.vis = cv2.cvtColor(self.flow_vis, cv2.COLOR_HSV2BGR)
+        self.mag, self.ang = cv2.cartToPolar(self.flow[...,0], self.flow[...,1])
+        self.hsv[...,0] = self.ang*180/np.pi/2
+        self.hsv[...,2] = cv2.normalize(self.mag, None, 0, 255, cv2.NORM_MINMAX)
+        self.vis = cv2.cvtColor(self.hsv, cv2.COLOR_HSV2BGR)
 
     def _prepare_frame(self, frame):
         if frame.ndim > 2:
@@ -88,3 +89,23 @@ class MHI:
         self.mhi = (self.alpha*frame +
                 (1-self.alpha)*self.mhi).astype(self.dtype)
 
+class MHB:
+    """
+    Max Horizontal Blob finds the max horizontal blob of a kernel in an
+    optical flow calculation.
+    """
+    def __init__(self, flow, kernel):
+        """
+        Args:
+            flow: OpticalFlow object
+            kernel: numpy array
+        """
+        self.flow = flow
+        self.kernel = kernel
+        self.hmag = np.ones(self.flow.hsv.shape[:2])
+
+    def compute(self):
+        self.hmag = self.flow.mag*np.cos(self.flow.ang)**2
+        blobbed = scipy.signal.convolve2d(self.hmag, self.kernel, mode='same')
+
+        return np.max(blobbed)
