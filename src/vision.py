@@ -107,5 +107,5 @@ class MHB:
     def compute(self):
         self.hmag = self.flow.mag*np.cos(self.flow.ang)**2
         blobbed = scipy.signal.convolve2d(self.hmag, self.kernel, mode='same')
-
-        return np.max(blobbed)
+        best_location = np.unravel_index(np.argmax(blobbed), blobbed.shape)
+        return blobbed[best_location], best_location

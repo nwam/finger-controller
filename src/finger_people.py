@@ -39,6 +39,9 @@ def finger_people(model_path, cap_source, cap_type, cam_props, record=None):
     h_speed_alpha = 0.2
     h_speed_thresh = 5.0
     h_speed = h_speed_thresh
+    h_pos_alpha = 0.3
+    h_pos_thresh = mhb.hmag.shape[1] * 0.33
+    h_pos = h_pos_thresh
     h_classes = ['run', 'walk']
 
     action = None
@@ -63,11 +66,20 @@ def finger_people(model_path, cap_source, cap_type, cam_props, record=None):
         class_id = np.argmax(prediction)
         class_label = dataset.id_to_gesture[class_id]
 
-        ''' WALK vs RUN '''
+        ''' WALK vs RUN and Direction '''
         if class_label not in h_classes:
             h_speed = h_speed_thresh
+            h_pos = h_pos_thresh
         else:
-            h_speed = h_speed_alpha*mhb.compute() + (1-h_speed_alpha)*h_speed
+            mhb_speed, mhb_pos = mhb.compute()
+
+            h_pos = h_pos_alpha*mhb_pos[1] + (1-h_pos_alpha)*h_pos
+            if h_pos > h_pos_thresh:
+                game_input.direction_forward()
+            else:
+                game_input.direction_backward()
+
+            h_speed = h_speed_alpha*mhb_speed + (1-h_speed_alpha)*h_speed
             if h_speed > h_speed_thresh:
                 class_label = 'run'
             else:
@@ -88,8 +100,10 @@ def finger_people(model_path, cap_source, cap_type, cam_props, record=None):
         ''' OUTPUT / DEBUG '''
         cnn_input_show = cv2.resize(cnn_input.frame, (h,h))
         cv2.putText(frame, action, (2, h-3), cv2.FONT_HERSHEY_DUPLEX, 0.5, (0,255,0))
-        cv2.putText(frame, str(int(h_speed)), (2, 10), cv2.FONT_HERSHEY_DUPLEX, 0.5, (0,255,0))
-        hmag_vis = cv2.cvtColor(cv2.resize((mhb.hmag*255).astype(np.uint8), (h,h)), cv2.COLOR_GRAY2RGB)
+        cv2.putText(frame, str(int(h_speed)) + ' ' + str(int(h_pos)),
+                (2, 10), cv2.FONT_HERSHEY_DUPLEX, 0.5, (0,255,0))
+        hmag_vis = cv2.cvtColor((mhb.hmag*255).astype(np.uint8), cv2.COLOR_GRAY2RGB)
+        hmag_vis = cv2.resize(hmag_vis, (h,h))
         debug_frame = np.hstack((frame, cnn_input_show, hmag_vis))
         cv2.imshow('frame', debug_frame)
 

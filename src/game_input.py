@@ -97,12 +97,6 @@ class GameInput:
         self.keyup(Key.B)
 
     def jump(self):
-        pressed = self.keydown(Key.A)
-
-        if pressed:
-            self.jump_id = threading.get_ident()
-            time.sleep(self.jump_cooldown)
-            if self.jump_id == threading.get_ident():
                 self.stop_jump()
 
     def stop_jump(self):
@@ -116,6 +110,14 @@ class GameInput:
 
     def duck(self):
         self.keydown(Key.DOWN)
+        time.sleep(self.tap_time)
+        self.keyup(Key.DOWN)
+
+    def direction_forward(self):
+        self.direction = Direction.RIGHT
+
+    def direction_backward(self):
+        self.direction = Direction.LEFT
 
     def perform(self, action):
         if not self.enabled or action is None:
@@ -135,9 +137,9 @@ class GameInput:
         elif action == 'duck':
             self.duck()
         elif action == 'movef':
-            self.direction = Direction.RIGHT
+            pass
         elif action == 'moveb':
-            self.direction = Direction.LEFT
+            pass
 
     def do(self, action):
         t = threading.Thread(target=self.perform, args=(action,))
