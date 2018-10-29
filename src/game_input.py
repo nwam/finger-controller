@@ -46,6 +46,7 @@ class GameInput:
         self.keys[Key.DOWN] = key_d
         self.pressed = dict([(key, False) for key in self.keys.keys()])
 
+        self.direction = Direction.RIGHT
         self.enabled = enabled
         self.tap_time = tap_time # seconds
         self.jump_cooldown = jump_cooldown
@@ -70,19 +71,22 @@ class GameInput:
         self.pressed[key] = False
         return released
 
-    def walk(self, direction=None):
+    def walk(self, direction=Direction.RIGHT):
+        self.stop_run()
         if direction is Direction.LEFT:
-            self.keydown(Key.LEFT)
             self.keyup(Key.RIGHT)
+            self.keydown(Key.LEFT)
         else:
-            self.keydown(Key.RIGHT)
             self.keyup(Key.LEFT)
+            self.keydown(Key.RIGHT)
 
-    def run(self, direction=None):
+    def run(self, direction=Direction.RIGHT):
         self.keydown(Key.B)
         if direction is Direction.LEFT:
+            self.keyup(Key.RIGHT)
             self.keydown(Key.LEFT)
         else:
+            self.keyup(Key.LEFT)
             self.keydown(Key.RIGHT)
 
     def stop_move(self):
@@ -110,19 +114,30 @@ class GameInput:
         time.sleep(self.tap_time)
         self.keyup(Key.B)
 
+    def duck(self):
+        self.keydown(Key.DOWN)
+
     def perform(self, action):
         if not self.enabled or action is None:
             pass
         elif action == 'stand':
             self.stop_move()
-        elif action == 'run' or action == 'walk':
-            self.walk()
+        elif action == 'walk':
+            self.walk(self.direction)
+        elif action == 'run':
+            self.run(self.direction)
         elif action == 'jump':
             self.jump()
-        elif action == 'down_jump':
-            pass
+        elif action == 'jumpd':
+            self.stop_jump()
         elif action == 'kick':
             self.kick()
+        elif action == 'duck':
+            self.duck()
+        elif action == 'movef':
+            self.direction = Direction.RIGHT
+        elif action == 'moveb':
+            self.direction = Direction.LEFT
 
     def do(self, action):
         t = threading.Thread(target=self.perform, args=(action,))

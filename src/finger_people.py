@@ -25,7 +25,7 @@ from capture import Capture, CapType
 from game_input import GameInput
 from recording import CamSide, CamProps
 
-sticky_size = 1
+sticky_size = 2
 
 def finger_people(model_path, cap_source, cap_type, cam_props, record=None):
     model = keras.models.load_model(model_path)
@@ -37,7 +37,7 @@ def finger_people(model_path, cap_source, cap_type, cam_props, record=None):
 
     mhb = MHB(cnn_input.flow, np.ones((2,2)))
     h_speed_alpha = 0.2
-    h_speed_thresh = 6.75
+    h_speed_thresh = 5.0
     h_speed = h_speed_thresh
     h_classes = ['run', 'walk']
 
