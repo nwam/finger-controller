@@ -97,6 +97,11 @@ class GameInput:
         self.keyup(Key.B)
 
     def jump(self):
+        pressed = self.keydown(Key.A)
+        if pressed:
+            self.jump_id = threading.get_ident()
+            time.sleep(self.jump_cooldown)
+            if self.jump_id == threading.get_ident():
                 self.stop_jump()
 
     def stop_jump(self):
