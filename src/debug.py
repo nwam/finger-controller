@@ -16,6 +16,11 @@ def prediction_frame(prediction, h, w):
 
     return frame
 
+def mhb_frame(mhb, h, w):
+    mhb_frame = cv2.cvtColor((mhb.mhi.mhi*25).astype(np.uint8), cv2.COLOR_GRAY2RGB)
+    mhb_frame = cv2.resize(mhb_frame, (w,h))
+    return mhb_frame
+
 def put_hpos_text(frame, h_pos, h_pos_thresh, pos=(2,25)):
     h_pos_color = (120,120,120)
     if h_pos > h_pos_thresh:

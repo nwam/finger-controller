@@ -103,27 +103,18 @@ def finger_people(model_path, cap_source, cap_type, cam_props, record=None):
         game_input.do(action)
 
         ''' OUTPUT / DEBUG '''
-        cnn_input_debug = cv2.resize(cnn_input.frame, (h,h))
         cv2.putText(frame, action, (2, h-3), cv2.FONT_HERSHEY_DUPLEX, 0.5, (0,255,0))
         cv2.putText(frame, str(int(h_speed)),
                 (2, 10), cv2.FONT_HERSHEY_DUPLEX, 0.5, (0,255,0))
-        h_pos_color = (120,120,120)
-        if h_pos > h_pos_thresh:
-            h_pos_color = (120,120,0)
-        elif h_pos < h_pos_thresh:
-            h_pos_color = (0,75,200)
+        debug.put_hpos_text(frame, h_pos, h_pos_thresh)
 
-        cv2.putText(frame, str(int(h_pos)),
-                (2,25), cv2.FONT_HERSHEY_DUPLEX, 0.5, h_pos_color)
-
-        hmag_vis = cv2.cvtColor((mhb.mhi.mhi*25).astype(np.uint8), cv2.COLOR_GRAY2RGB)
-        hmag_vis = cv2.resize(hmag_vis, (h,h))
-
-        debug_frame = np.hstack((frame, cnn_input_debug, hmag_vis))
+        cnn_input_debug = cv2.resize(cnn_input.frame, (h,h))
+        mhb_debug = debug.mhb_frame(mhb, h, h)
+        debug_frame = np.hstack((frame, cnn_input_debug, mhb_debug))
         prediction_debug = debug.prediction_frame(
                 prediction, 300, debug_frame.shape[1])
-
         debug_frame = np.vstack((debug_frame, prediction_debug))
+
         cv2.imshow('frame', debug_frame)
 
         if record:
