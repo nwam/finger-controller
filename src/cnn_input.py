@@ -26,6 +26,8 @@ class CnnInput:
         first_frame = self._prepare_frame(first_frame)
         self.flow = vision.OpticalFlow(first_frame)
         self.mhi = vision.MHI(self.flow.hsv.shape, np.uint8, mhi_alpha)
+        self.frame = self.mhi.mhi[self.edge_clip:-self.edge_clip,
+                self.edge_clip:-self.edge_clip]
 
     def update(self, frame):
         resized_frame = self._resize_frame(frame)

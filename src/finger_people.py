@@ -21,6 +21,7 @@ import numpy as np
 from cnn_input import CnnInput
 from vision import MHB
 import dataset
+from dataset import gesture_ids
 from capture import Capture, CapType
 from game_input import GameInput
 from recording import CamSide, CamProps
@@ -40,7 +41,7 @@ def finger_people(model_path, cap_source, cap_type, cam_props, record=None):
     h_speed_alpha = 0.2
     h_speed_thresh = 5.0
     h_speed = h_speed_thresh
-    h_pos_alpha = 0.3
+    h_pos_alpha = 0.40
     h_pos_thresh = mhb.hmag.shape[1] * 0.33
     h_pos = h_pos_thresh
     h_classes = ['run', 'walk']
@@ -63,6 +64,9 @@ def finger_people(model_path, cap_source, cap_type, cam_props, record=None):
         cnn_input.update(frame)
         cnn_input_4d = np.expand_dims(cnn_input.frame, 0)
         prediction = model.predict(cnn_input_4d)[0]
+
+        if prediction[gesture_ids['duck']] < 0.60:
+            prediction[gesture_ids['duck']] = 0
 
         class_id = np.argmax(prediction)
         class_label = dataset.id_to_gesture[class_id]
@@ -104,7 +108,7 @@ def finger_people(model_path, cap_source, cap_type, cam_props, record=None):
         cv2.putText(frame, str(int(h_speed)) + ' ' + str(int(h_pos)),
                 (2, 10), cv2.FONT_HERSHEY_DUPLEX, 0.5, (0,255,0))
 
-        hmag_vis = cv2.cvtColor((mhb.hmag*255).astype(np.uint8), cv2.COLOR_GRAY2RGB)
+        hmag_vis = cv2.cvtColor((mhb.hmag*25).astype(np.uint8), cv2.COLOR_GRAY2RGB)
         hmag_vis = cv2.resize(hmag_vis, (h,h))
 
         debug_frame = np.hstack((frame, cnn_input_debug, hmag_vis))

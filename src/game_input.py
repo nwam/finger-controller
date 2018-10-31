@@ -45,6 +45,8 @@ class GameInput:
         self.keys[Key.UP] = key_u
         self.keys[Key.DOWN] = key_d
         self.pressed = dict([(key, False) for key in self.keys.keys()])
+        self.curr_action = ''
+        self.prev_action = ''
 
         self.direction = Direction.RIGHT
         self.enabled = enabled
@@ -125,6 +127,10 @@ class GameInput:
         self.direction = Direction.LEFT
 
     def perform(self, action):
+        if self.curr_action != action:
+            self.prev_action = self.curr_action
+            self.curr_action = action
+
         if not self.enabled or action is None:
             pass
         elif action == 'stand':
@@ -142,9 +148,15 @@ class GameInput:
         elif action == 'duck':
             self.duck()
         elif action == 'movef':
-            pass
+            if self.prev_action == 'run':
+                self.run(Direction.RIGHT)
+            else:
+                self.walk(Direction.RIGHT)
         elif action == 'moveb':
-            pass
+            if self.prev_action == 'run':
+                self.run(Direction.LEFT)
+            else:
+                self.walk(Direction.LEFT)
 
     def do(self, action):
         t = threading.Thread(target=self.perform, args=(action,))
