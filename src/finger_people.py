@@ -37,12 +37,12 @@ def finger_people(model_path, cap_source, cap_type, cam_props, record=None):
     ret, first_frame = cap.read()
     cnn_input = CnnInput(first_frame)
 
-    mhb = MHB(cnn_input.flow, np.ones((2,2)))
+    mhb = MHB(cnn_input, np.ones((2,2)))
     h_speed_alpha = 0.2
     h_speed_thresh = 5.0
     h_speed = h_speed_thresh
-    h_pos_alpha = 0.40
-    h_pos_thresh = mhb.hmag.shape[1] * 0.33
+    h_pos_alpha = 0.3
+    h_pos_thresh = mhb.hmag.shape[1] * 0.425
     h_pos = h_pos_thresh
     h_classes = ['run', 'walk']
 
@@ -105,10 +105,18 @@ def finger_people(model_path, cap_source, cap_type, cam_props, record=None):
         ''' OUTPUT / DEBUG '''
         cnn_input_debug = cv2.resize(cnn_input.frame, (h,h))
         cv2.putText(frame, action, (2, h-3), cv2.FONT_HERSHEY_DUPLEX, 0.5, (0,255,0))
-        cv2.putText(frame, str(int(h_speed)) + ' ' + str(int(h_pos)),
+        cv2.putText(frame, str(int(h_speed)),
                 (2, 10), cv2.FONT_HERSHEY_DUPLEX, 0.5, (0,255,0))
+        h_pos_color = (120,120,120)
+        if h_pos > h_pos_thresh:
+            h_pos_color = (120,120,0)
+        elif h_pos < h_pos_thresh:
+            h_pos_color = (0,75,200)
 
-        hmag_vis = cv2.cvtColor((mhb.hmag*25).astype(np.uint8), cv2.COLOR_GRAY2RGB)
+        cv2.putText(frame, str(int(h_pos)),
+                (2,25), cv2.FONT_HERSHEY_DUPLEX, 0.5, h_pos_color)
+
+        hmag_vis = cv2.cvtColor((mhb.mhi.mhi*25).astype(np.uint8), cv2.COLOR_GRAY2RGB)
         hmag_vis = cv2.resize(hmag_vis, (h,h))
 
         debug_frame = np.hstack((frame, cnn_input_debug, hmag_vis))

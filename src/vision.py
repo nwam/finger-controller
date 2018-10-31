@@ -94,18 +94,23 @@ class MHB:
     Max Horizontal Blob finds the max horizontal blob of a kernel in an
     optical flow calculation.
     """
-    def __init__(self, flow, kernel):
+    def __init__(self, cnn_input, kernel):
         """
         Args:
-            flow: OpticalFlow object
+            cnn_input: CnnInput object
             kernel: numpy array
         """
-        self.flow = flow
+        self.clip = cnn_input.edge_clip
+        self.flow = cnn_input.flow
         self.kernel = kernel
-        self.hmag = np.ones(self.flow.hsv.shape[:2])
+        self.hmag = np.ones([v-2*self.clip for v in self.flow.hsv.shape[:2]])
+        self.mhi = MHI(self.hmag.shape, np.float, cnn_input.mhi.alpha)
 
     def compute(self):
         self.hmag = self.flow.mag*np.cos(self.flow.ang)**2
-        blobbed = scipy.signal.convolve2d(self.hmag, self.kernel, mode='same')
-        best_location = np.unravel_index(np.argmax(blobbed), blobbed.shape)
-        return blobbed[best_location], best_location
+        self.hmag = self.hmag[self.clip:-self.clip, self.clip:-self.clip]
+        convd = scipy.signal.convolve2d(self.hmag, self.kernel, mode='same')
+        self.mhi.update(convd)
+        best_location = np.unravel_index(
+                np.argmax(self.mhi.mhi), self.mhi.mhi.shape)
+        return self.mhi.mhi[best_location], best_location

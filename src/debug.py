@@ -15,3 +15,15 @@ def prediction_frame(prediction, h, w):
                 (0,int(255*probability), int(255*(1-probability))), cv2.FILLED)
 
     return frame
+
+def put_hpos_text(frame, h_pos, h_pos_thresh, pos=(2,25)):
+    h_pos_color = (120,120,120)
+    if h_pos > h_pos_thresh:
+        h_pos_color = (120,120,0)
+    elif h_pos < h_pos_thresh:
+        h_pos_color = (0,75,200)
+
+    cv2.putText(frame, str(int(h_pos)),
+            pos, cv2.FONT_HERSHEY_DUPLEX, 0.5, h_pos_color)
+
+
