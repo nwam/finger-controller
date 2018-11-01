@@ -21,9 +21,9 @@ class OpticalFlow:
     # Parameters for farneback optical flow
     fb_params = dict(
         pyr_scale = 0.5,
-        levels = 3,
-        winsize = 5,
-        iterations = 3,
+        levels = 5,
+        winsize = 7,
+        iterations = 5,
         poly_n = 5,
         poly_sigma = 1.2,
         flags = 0)

@@ -49,6 +49,7 @@ def finger_people(model_path, cap_source, cap_type, cam_props, record=None):
     action = None
     prev_label = None
     sticky = 0
+    tolerance = 0.8
 
     h = first_frame.shape[0]
 
@@ -64,9 +65,6 @@ def finger_people(model_path, cap_source, cap_type, cam_props, record=None):
         cnn_input.update(frame)
         cnn_input_4d = np.expand_dims(cnn_input.frame, 0)
         prediction = model.predict(cnn_input_4d)[0]
-
-        if prediction[gesture_ids['duck']] < 0.60:
-            prediction[gesture_ids['duck']] = 0
 
         class_id = np.argmax(prediction)
         class_label = dataset.id_to_gesture[class_id]
@@ -100,6 +98,8 @@ def finger_people(model_path, cap_source, cap_type, cam_props, record=None):
         prev_label = class_label
 
         ''' GAME INPUT '''
+        if prediction[class_id] < tolerance:
+            action = None
         game_input.do(action)
 
         ''' OUTPUT / DEBUG '''
