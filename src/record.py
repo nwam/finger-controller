@@ -54,7 +54,7 @@ def record(cap_source, cap_type, recordings, cam_props, output_dir='../data/'):
             record_n -= 1
 
         cnn_input.update(frame)
-        cnn_input_show = cv2.resize(cnn_input.frame, (h,h))
+        cnn_input_show = cv2.resize(cnn_input.frames[0], (h,h))
         if rec_i < len(recordings):
             cv2.putText(frame, recordings[rec_i].info, (2, h-3),
                     cv2.FONT_HERSHEY_DUPLEX, 0.5, (0,255,0))

@@ -104,7 +104,7 @@ class MHB:
         self.flow = cnn_input.flow
         self.kernel = kernel
         self.hmag = np.ones([v-2*self.clip for v in self.flow.hsv.shape[:2]])
-        self.mhi = MHI(self.hmag.shape, np.float, cnn_input.mhi.alpha)
+        self.mhi = MHI(self.hmag.shape, np.float, cnn_input.mhis[0].alpha)
 
     def compute(self):
         self.hmag = self.flow.mag*np.cos(self.flow.ang)**2

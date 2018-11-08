@@ -50,7 +50,7 @@ def preprocess(data_dir=data_dir):
         pickle_file = '{}.pickle'.format(os.path.splitext(input_file)[0])
         cap = Capture(input_file, CapType.VIDEO)
         ret, first_frame = cap.read()
-        cnn_input = CnnInput(first_frame, debug=True)
+        cnn_input = CnnInput(first_frame)
         if os.path.exists(pickle_file):
             cam_props, recordings = pickle.load(open(pickle_file, 'rb'))
 
@@ -82,12 +82,15 @@ def preprocess(data_dir=data_dir):
 
             # Save a frame
             if frames_i == rec_frames[recf_i]:
-                output_name = '{}-{}-{}{}'.format(
-                        str(file_id), str(rec_i), str(recf_i), ftype)
-                output_path = os.path.join(output_dir, output_name)
-                cv2.imwrite(output_path, cnn_input.frame)
-                data[recordings[rec_i].label][-1].append(
-                        os.path.join(recordings[rec_i].label, output_name))
+                paths = []
+                for i, frame in enumerate(cnn_input.frames):
+                    output_name = '{}-{}-{}_{}{}'.format(str(file_id),
+                            str(rec_i), str(recf_i), str(i), ftype)
+                    output_path = os.path.join(output_dir, output_name)
+                    paths.append(
+                            os.path.join(recordings[rec_i].label, output_name))
+                    cv2.imwrite(output_path, frame)
+                data[recordings[rec_i].label][-1].append(paths)
                 recf_i += 1
 
             frames_i += 1

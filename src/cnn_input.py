@@ -17,31 +17,28 @@ import dataset
 import vision
 
 class CnnInput:
-    def __init__(self, first_frame, edge_clip=3, mhi_alpha=0.25, debug=False):
+    def __init__(self, first_frame, edge_clip=3, mhi_alphas=[0.25, 0.4]):
         self.edge_clip = edge_clip
         self.original_shape = tuple([n + 2*self.edge_clip
                 for n in reversed(dataset.input_shape[:2])])
-        self.debug = debug
 
         first_frame = self._prepare_frame(first_frame)
         self.flow = vision.OpticalFlow(first_frame)
-        self.mhi = vision.MHI(self.flow.hsv.shape, np.uint8, mhi_alpha)
-        self.frame = self.mhi.mhi[self.edge_clip:-self.edge_clip,
-                self.edge_clip:-self.edge_clip]
+        self.mhis = [vision.MHI(self.flow.hsv.shape, np.uint8, mhi_alpha) for mhi_alpha in mhi_alphas]
+        self.frames = [mhi.mhi[self.edge_clip:-self.edge_clip,
+                self.edge_clip:-self.edge_clip] for mhi in self.mhis]
 
     def update(self, frame):
         resized_frame = self._resize_frame(frame)
         prepared_frame = self._gray_frame(resized_frame)
 
         self.flow.update(prepared_frame)
-        self.mhi.update(self.flow.vis)
-        clipped_mhi = self.mhi.mhi[self.edge_clip:-self.edge_clip,
-                self.edge_clip:-self.edge_clip]
+        for mhi in self.mhis:
+            mhi.update(self.flow.vis)
+        clipped_mhis = [mhi.mhi[self.edge_clip:-self.edge_clip,
+                self.edge_clip:-self.edge_clip] for mhi in self.mhis]
 
-        if self.debug:
-            cv2.imshow('cnn_input', np.hstack((resized_frame, self.flow.vis, self.mhi.mhi)))
-
-        self.frame = clipped_mhi
+        self.frames = clipped_mhis
 
     def _resize_frame(self, frame):
         if frame.shape[:2] != self.original_shape:
