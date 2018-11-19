@@ -44,7 +44,8 @@ def finger_people(model_path, cap_source, cap_type, cam_props, record=None):
     h_pos_alpha = 0.3
     h_pos_thresh = mhb.hmag.shape[1] * 0.425
     h_pos = h_pos_thresh
-    h_classes = ['run', 'walk']
+    h_classes = ['run', 'walk', 'movef', 'moveb']
+    hpos_color = None
 
     action = None
     prev_label = None
@@ -102,7 +103,7 @@ def finger_people(model_path, cap_source, cap_type, cam_props, record=None):
             action = None
         game_input.do(action)
 
-        ''' OUTPUT / DEBUG '''
+        ''' OUTPUT / DEBUG / FEEDBACK '''
         cv2.putText(frame, action, (2, h-3), cv2.FONT_HERSHEY_DUPLEX, 0.5, (0,255,0))
         cv2.putText(frame, str(int(h_speed)),
                 (2, 10), cv2.FONT_HERSHEY_DUPLEX, 0.5, (0,255,0))
@@ -113,7 +114,10 @@ def finger_people(model_path, cap_source, cap_type, cam_props, record=None):
         debug_frame = np.hstack((frame, cnn_input_debug, mhb_debug))
         prediction_debug = debug.prediction_frame(
                 prediction, 300, debug_frame.shape[1])
-        debug_frame = np.vstack((debug_frame, prediction_debug))
+        if class_label in h_classes or hpos_color is None:
+            hpos_color = debug.hpos_color(h_pos, mhb.mhi.mhi.shape[1], h_pos_thresh,
+                    (200, debug_frame.shape[1]))
+        debug_frame = np.vstack((debug_frame, prediction_debug, hpos_color))
 
         cv2.imshow('frame', debug_frame)
 
