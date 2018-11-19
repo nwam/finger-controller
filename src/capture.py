@@ -50,8 +50,8 @@ class CapType(enum.Enum):
 
 class Capture:
     def __init__(self, source, source_type):
-        if type(source) == int and source_type == CapType.CAMERA:
-            cap = cv2.VideoCapture(source)
+        if source_type == CapType.CAMERA:
+            cap = cv2.VideoCapture(int(source))
             w = 180
             h = w * 3/4
             cap.set(cv2.CAP_PROP_FRAME_WIDTH, w)

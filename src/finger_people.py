@@ -154,16 +154,16 @@ if __name__ == '__main__':
         print('Invalid camera side. Please use l or r.')
         exit()
 
-    cap_source = args.cap_source
-    cap_source_template = 'http://192.168.0.{}:8080/video'
-    if args.cap_source.isdigit():
-        cap_source = cap_source_template.format(str(args.cap_source))
-
     cap_type = args.cap_type[0].lower()
     if cap_type == 'video':
         cap_type = CapType.VIDEO
     elif cap_type == 'camera':
         cap_type = CapType.CAMERA
+
+    cap_source = args.cap_source
+    cap_source_template = 'http://192.168.0.{}:8080/video'
+    if args.cap_source.isdigit() and cap_type == CapType.VIDEO:
+        cap_source = cap_source_template.format(str(args.cap_source))
 
     record = None
     if args.record:
