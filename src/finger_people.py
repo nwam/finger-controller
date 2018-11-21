@@ -37,7 +37,7 @@ def finger_people(model_path, cap_source, cap_type, cam_props, record=None):
     ret, first_frame = cap.read()
     cnn_input = CnnInput(first_frame)
 
-    mhb = MHB(cnn_input, np.ones((2,2)))
+    mhb = MHB(cnn_input, 90)
     h_speed_alpha = 0.2
     h_speed_thresh = 5.0
     h_speed = h_speed_thresh

@@ -91,26 +91,41 @@ class MHI:
 
 class MHB:
     """
-    Max Horizontal Blob finds the max horizontal blob of a kernel in an
+    Max Horizontal Blob finds the max horizontal blob in an
     optical flow calculation.
     """
-    def __init__(self, cnn_input, kernel):
+    def __init__(self, cnn_input, percentile=80):
         """
         Args:
             cnn_input: CnnInput object
-            kernel: numpy array
+            percentile: number [0,100] specifying which pixels to consider
+                for blobbing.
         """
         self.clip = cnn_input.edge_clip
         self.flow = cnn_input.flow
-        self.kernel = kernel
         self.hmag = np.ones([v-2*self.clip for v in self.flow.hsv.shape[:2]])
         self.mhi = MHI(self.hmag.shape, np.float, cnn_input.mhi.alpha)
+        self.percentile = percentile
 
     def compute(self):
         self.hmag = self.flow.mag*np.cos(self.flow.ang)**2
         self.hmag = self.hmag[self.clip:-self.clip, self.clip:-self.clip]
-        convd = scipy.signal.convolve2d(self.hmag, self.kernel, mode='same')
-        self.mhi.update(convd)
-        best_location = np.unravel_index(
-                np.argmax(self.mhi.mhi), self.mhi.mhi.shape)
+        self.mhi.update(self.hmag)
+        filtered = (1 * (self.mhi.mhi >
+                np.percentile(self.mhi.mhi, self.percentile))).astype(np.uint8)
+
+        _, contours, _ = cv2.findContours(
+                filtered, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+
+        best_contour = None
+        best_area = 0
+        for contour in contours:
+            area = cv2.contourArea(contour)
+            if area > best_area:
+                best_contour = contour
+                best_area = area
+
+        m = cv2.moments(best_contour)
+        best_location = (int(m['m01'] / m['m00']), int(m['m10'] / m['m00']))
+
         return self.mhi.mhi[best_location], best_location
