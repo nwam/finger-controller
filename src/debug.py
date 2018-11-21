@@ -18,6 +18,11 @@ def prediction_frame(prediction, h, w):
 
 def mhb_frame(mhb, h, w):
     mhb_frame = cv2.cvtColor((mhb.mhi.mhi*25).astype(np.uint8), cv2.COLOR_GRAY2RGB)
+    try:
+        if mhb.contour.any():
+            mhb_frame = cv2.drawContours(mhb_frame, [mhb.contour], 0, (200, 200, 0))
+    except:
+        pass
     mhb_frame = cv2.resize(mhb_frame, (w,h))
     return mhb_frame
 

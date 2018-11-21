@@ -106,6 +106,7 @@ class MHB:
         self.hmag = np.ones([v-2*self.clip for v in self.flow.hsv.shape[:2]])
         self.mhi = MHI(self.hmag.shape, np.float, cnn_input.mhi.alpha)
         self.percentile = percentile
+        self.contour = None
 
     def compute(self):
         self.hmag = self.flow.mag*np.cos(self.flow.ang)**2
@@ -117,15 +118,15 @@ class MHB:
         _, contours, _ = cv2.findContours(
                 filtered, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
 
-        best_contour = None
+        self.contour = None
         best_area = 0
         for contour in contours:
             area = cv2.contourArea(contour)
             if area > best_area:
-                best_contour = contour
+                self.contour = contour
                 best_area = area
 
-        m = cv2.moments(best_contour)
+        m = cv2.moments(self.contour)
         best_location = (int(m['m01'] / m['m00']), int(m['m10'] / m['m00']))
 
         return self.mhi.mhi[best_location], best_location
