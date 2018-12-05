@@ -55,10 +55,12 @@ def record(cap_source, cap_type, recordings, cam_props, mock, output_dir='../dat
 
         cnn_input.update(frame)
         cnn_input_show = cv2.resize(cnn_input.frame, (h,h))
+        action_display = np.zeros((h, frame.shape[1]+h, 3), dtype=np.uint8)
         if rec_i < len(recordings):
-            cv2.putText(frame, recordings[rec_i].info, (2, h-3),
-                    cv2.FONT_HERSHEY_DUPLEX, 0.5, (0,255,0))
-        cv2.imshow('frame', np.hstack((frame, cnn_input_show)))
+            cv2.putText(action_display, recordings[rec_i].info, (4, h-16),
+                    cv2.FONT_HERSHEY_DUPLEX, 1, (0,255,0))
+        cv2.imshow('frame', np.vstack((np.hstack(
+            (frame, cnn_input_show)), action_display)))
 
         key = cv2.waitKey(3) & 0xFF
         if key == ord('q'):
