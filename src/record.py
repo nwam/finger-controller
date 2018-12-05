@@ -25,7 +25,7 @@ from cnn_input import CnnInput
 import recording
 from recording import CamSide, CamProps
 
-def record(cap_source, cap_type, recordings, cam_props, output_dir='../data/'):
+def record(cap_source, cap_type, recordings, cam_props, mock, output_dir='../data/'):
     cap = Capture(cap_source, cap_type)
     output_prefix = os.path.join(output_dir,
             str(time.time()))
@@ -49,7 +49,7 @@ def record(cap_source, cap_type, recordings, cam_props, output_dir='../data/'):
 
         out.write(frame)
 
-        if record_n+1 > 0:
+        if record_n+1 > 0 or mock:
             cv2.circle(frame, (6,6), (5), (0,0,255), cv2.FILLED)
             record_n -= 1
 
@@ -63,8 +63,11 @@ def record(cap_source, cap_type, recordings, cam_props, output_dir='../data/'):
         key = cv2.waitKey(3) & 0xFF
         if key == ord('q'):
             break
-        if key == ord('f') and record_n <= 0:
-            recordings[rec_i].frame = frame_i
+        if (key == ord('f') or mock) and record_n <= 0:
+            try:
+                recordings[rec_i].frame = frame_i
+            except:
+                break
             if recordings[rec_i].rec_mode == recording.RecMode.AFTER:
                 record_n = recordings[rec_i].n_frames
             elif recordings[rec_i].rec_mode == recording.RecMode.MIDDLE:
@@ -84,7 +87,15 @@ if __name__ == '__main__':
             help='The source of the Capture object.')
     parser.add_argument('cap_type', nargs='*', default=['video'],
             help='The type of the Capture device used as video input.')
+    parser.add_argument('-m', '--mock', action='store_true',
+            help='Flag to record a mock game instead of data.')
     args = parser.parse_args()
+
+    mock = args.mock
+
+    output_dir = '../data/'
+    if mock:
+        output_dir = '../mock_data/'
 
     cam_side = args.camera_side.lower()
     if cam_side == 'left' or cam_side == 'l':
@@ -106,7 +117,11 @@ if __name__ == '__main__':
     elif cap_type == 'camera':
         cap_type = CapType.CAMERA
 
-    recordings = recording.generate_sequence()
+    if not mock:
+        recordings = recording.generate_sequence()
+    else:
+        recordings = recording.random_mock_gestures()
+
     cam_props = CamProps(cam_side)
 
-    record(cap_source, cap_type, recordings, cam_props)
+    record(cap_source, cap_type, recordings, cam_props, mock, output_dir)
