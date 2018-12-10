@@ -10,7 +10,7 @@ Usage:
     be displayed on-screen along side the video source. Press f to record the
     current Recording.
 
-    The video will be stored at a timestapped filed, and Recording data and
+    The video will be stored at a timestamped file, and Recording data and
     camera data will be stored at a file with the same name and a .pickle
     extension.
 """
@@ -97,7 +97,7 @@ if __name__ == '__main__':
 
     output_dir = '../data/'
     if mock:
-        output_dir = '../mock_data/'
+        output_dir = '../mock_data/fp/'
 
     cam_side = args.camera_side.lower()
     if cam_side == 'left' or cam_side == 'l':
