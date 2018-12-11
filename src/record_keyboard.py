@@ -66,10 +66,13 @@ def record(recordings, out_fname, second):
         recording.frame = time.time()
 
         for frame_num in range(recording.n_frames):
+            complete = frame_num / recording.n_frames
 
             action_display = np.zeros((h, w, 3), dtype=np.uint8)
             cv2.putText(action_display, recording.info, (4,h-16),
                     cv2.FONT_HERSHEY_DUPLEX, 1, (0,255,0))
+            cv2.rectangle(action_display, (0,0), (int(w*complete-1), 16),
+                    (0,255-int(2*complete*255),0), cv2.FILLED)
             cv2.imshow('frame', action_display)
 
             key = cv2.waitKey(int(1000/second)) & 0xFF

@@ -56,7 +56,16 @@ def record(cap_source, cap_type, recordings, cam_props, mock, output_dir='../dat
         cnn_input.update(frame)
         cnn_input_show = cv2.resize(cnn_input.frame, (h,h))
         action_display = np.zeros((h, frame.shape[1]+h, 3), dtype=np.uint8)
-        if rec_i < len(recordings):
+        if record_n > 0:
+            complete = (recordings[rec_i-1].n_frames - record_n) /\
+                    recordings[rec_i-1].n_frames
+            cv2.rectangle(action_display, (0,0),
+                    (int(complete*(frame.shape[1]+h)-1), 16),
+                    (0, 255-int(2*complete*255), 0), cv2.FILLED)
+        if mock:
+            cv2.putText(action_display, recordings[rec_i-1].info, (4, h-16),
+                    cv2.FONT_HERSHEY_DUPLEX, 1, (0,255,0))
+        elif rec_i < len(recordings):
             cv2.putText(action_display, recordings[rec_i].info, (4, h-16),
                     cv2.FONT_HERSHEY_DUPLEX, 1, (0,255,0))
         cv2.imshow('frame', np.vstack((np.hstack(
@@ -64,6 +73,7 @@ def record(cap_source, cap_type, recordings, cam_props, mock, output_dir='../dat
 
         key = cv2.waitKey(3) & 0xFF
         if key == ord('q'):
+            os.remove(output_path)
             exit()
         if (key == ord('f') or mock) and record_n <= 0:
             try:
