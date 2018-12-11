@@ -28,6 +28,7 @@ from recording import CamSide, CamProps
 import debug
 
 sticky_size = 2
+h_pos_ratio = 0.425
 
 def finger_people(model_path, cap_source, cap_type, cam_props, record=None):
     model = keras.models.load_model(model_path)
@@ -42,7 +43,7 @@ def finger_people(model_path, cap_source, cap_type, cam_props, record=None):
     h_speed_thresh = 5.0
     h_speed = h_speed_thresh
     h_pos_alpha = 0.3
-    h_pos_thresh = mhb.hmag.shape[1] * 0.425
+    h_pos_thresh = mhb.hmag.shape[1] * h_pos_ratio
     h_pos = h_pos_thresh
     h_classes = ['run', 'walk', 'movef', 'moveb']
     hpos_color = None
@@ -107,6 +108,8 @@ def finger_people(model_path, cap_source, cap_type, cam_props, record=None):
         cv2.putText(frame, action, (2, h-3), cv2.FONT_HERSHEY_DUPLEX, 0.5, (0,255,0))
         cv2.putText(frame, str(int(h_speed)),
                 (2, 10), cv2.FONT_HERSHEY_DUPLEX, 0.5, (0,255,0))
+        h_line = int(h_pos_ratio * frame.shape[1])
+        cv2.line(frame, (h_line, 0), (h_line, h), (0,0,255))
         debug.put_hpos_text(frame, h_pos, h_pos_thresh)
 
         cnn_input_debug = cv2.resize(cnn_input.frame, (h,h))

@@ -24,6 +24,7 @@ from capture import Capture, CapType
 from cnn_input import CnnInput
 import recording
 from recording import CamSide, CamProps
+from finger_people import h_pos_ratio
 
 def record(cap_source, cap_type, recordings, cam_props, mock, output_dir='../data/'):
     cap = Capture(cap_source, cap_type)
@@ -53,6 +54,8 @@ def record(cap_source, cap_type, recordings, cam_props, mock, output_dir='../dat
             cv2.circle(frame, (6,6), (5), (0,0,255), cv2.FILLED)
             record_n -= 1
 
+        h_line = int(h_pos_ratio * frame.shape[1])
+        cv2.line(frame, (h_line, 0), (h_line, h), (0,0,255))
         cnn_input.update(frame)
         cnn_input_show = cv2.resize(cnn_input.frame, (h,h))
         action_display = np.zeros((h, frame.shape[1]+h, 3), dtype=np.uint8)
