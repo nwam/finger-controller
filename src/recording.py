@@ -116,12 +116,14 @@ def random_gestures(n=1):
 
 def random_mock_gestures(second=30):
     def randt(n=1):
-        return random.randint(int(n*second*0.5), int(n*second*1.5))
+        return int(second/2 + random.randint(int(n*second*0.5), int(n*second*1.5)))
 
     gestures = [
             Recording('stand', 'stand', n_frames=randt()),
             Recording('stand', 'stand', n_frames=randt(2)),
             Recording('stand', 'stand', n_frames=randt(2)),
+            Recording('stand', 'stand', n_frames=randt()),
+            Recording('stand', 'stand', n_frames=randt()),
             Recording('stand', 'stand', n_frames=randt()),
             Recording('stand', 'stand', n_frames=randt()),
 
@@ -131,12 +133,17 @@ def random_mock_gestures(second=30):
             Recording('walkf', 'walk', n_frames=randt(3)),
             Recording('walkf', 'walk', n_frames=randt(2)),
             Recording('walkf', 'walk', n_frames=randt()),
+            Recording('walkf', 'walk', n_frames=randt(1.5)),
+            Recording('walkf', 'walk', n_frames=randt(1.5)),
+            Recording('walkf', 'walk', n_frames=randt(1.5)),
+            Recording('runf', 'run', n_frames=randt()),
             Recording('runf', 'run', n_frames=randt()),
             Recording('runf', 'run', n_frames=randt(3)),
             Recording('runf', 'run', n_frames=randt(2)),
             Recording('walkb', 'walk back', n_frames=randt(1.5)),
             Recording('walkb', 'walk back', n_frames=randt()),
             Recording('walkb', 'walk back', n_frames=randt()),
+            Recording('walkb', 'walk back', n_frames=randt(2)),
             Recording('walkb', 'walk back', n_frames=randt(2)),
             Recording('runb', 'run back', n_frames=randt(2)),
             Recording('runb', 'run back', n_frames=randt()),
@@ -147,14 +154,22 @@ def random_mock_gestures(second=30):
             Recording('jumpb', 'jump', n_frames=randt()),
             Recording('jumpb', 'jump', n_frames=randt()),
             Recording('jumpb', 'jump', n_frames=randt()),
+            Recording('jumpb', 'jump', n_frames=randt()),
+            Recording('jumpb', 'jump', n_frames=randt()),
             Recording('jumps', 'hop', n_frames=randt()),
             Recording('jumps', 'hop', n_frames=randt()),
             Recording('jumps', 'hop', n_frames=randt()),
             Recording('jumps', 'hop', n_frames=randt()),
+            Recording('jumps', 'hop', n_frames=randt()),
+            Recording('kick', 'kick', n_frames=randt()),
+            Recording('kick', 'kick', n_frames=randt()),
+            Recording('kick', 'kick', n_frames=randt()),
             Recording('kick', 'kick', n_frames=randt()),
             Recording('kick', 'kick', n_frames=randt()),
             Recording('kick', 'kick', n_frames=randt()),
             Recording('duck', 'duck', n_frames=randt()),
+            Recording('duck', 'duck', n_frames=randt()),
+            Recording('duck', 'duck', n_frames=randt())
             Recording('duck', 'duck', n_frames=randt())
     ]
 

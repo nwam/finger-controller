@@ -64,7 +64,7 @@ def record(cap_source, cap_type, recordings, cam_props, mock, output_dir='../dat
 
         key = cv2.waitKey(3) & 0xFF
         if key == ord('q'):
-            break
+            exit()
         if (key == ord('f') or mock) and record_n <= 0:
             try:
                 recordings[rec_i].frame = frame_i
