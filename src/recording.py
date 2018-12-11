@@ -43,6 +43,8 @@ class Recording:
         self.frame = None
 
     def get_frames(self):
+        if self.frame is None:
+            return []
         if self.rec_mode == RecMode.AFTER:
             return list(range(self.frame, self.frame+self.n_frames))
         elif self.rec_mode == RecMode.MIDDLE:

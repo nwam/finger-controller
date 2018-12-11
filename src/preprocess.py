@@ -62,6 +62,10 @@ def preprocess(data_dir=data_dir):
         label = None
 
         while cap.is_opened() and rec_i < len(recordings):
+            if len(recordings[rec_i].get_frames()) == 0:
+                rec_i += 1
+                continue
+
             ret, frame = cap.read()
             if not ret:
                 break

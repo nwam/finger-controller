@@ -28,6 +28,7 @@ from recording import CamSide, CamProps
 import debug
 
 sticky_size = 2
+tolerance_patience = 3
 h_pos_ratio = 0.425
 
 def finger_people(model_path, cap_source, cap_type, cam_props, record=None):
@@ -51,7 +52,8 @@ def finger_people(model_path, cap_source, cap_type, cam_props, record=None):
     action = None
     prev_label = None
     sticky = 0
-    tolerance = 0.8
+    patience = tolerance_patience
+    tolerance = 0.7
 
     h = first_frame.shape[0]
 
@@ -90,7 +92,16 @@ def finger_people(model_path, cap_source, cap_type, cam_props, record=None):
             else:
                 class_label = 'walk'
 
-        ''' STICKY OUTPUT '''
+        ''' STICKY OUTPUT and TOLERANCE'''
+        if prediction[class_id] < tolerance:
+            patience -= 1
+            if patience < 0:
+                action = None
+            else:
+                action = prev_label
+        else:
+            patience = tolerance_patience
+
         if class_label != prev_label:
             sticky_i = 0
         if sticky_i < sticky_size:
@@ -100,8 +111,6 @@ def finger_people(model_path, cap_source, cap_type, cam_props, record=None):
         prev_label = class_label
 
         ''' GAME INPUT '''
-        if prediction[class_id] < tolerance:
-            action = None
         game_input.do(action)
 
         ''' OUTPUT / DEBUG / FEEDBACK '''
