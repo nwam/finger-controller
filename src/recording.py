@@ -169,7 +169,7 @@ def random_mock_gestures(second=30):
             Recording('kick', 'kick', n_frames=randt()),
             Recording('duck', 'duck', n_frames=randt()),
             Recording('duck', 'duck', n_frames=randt()),
-            Recording('duck', 'duck', n_frames=randt())
+            Recording('duck', 'duck', n_frames=randt()),
             Recording('duck', 'duck', n_frames=randt())
     ]
 
