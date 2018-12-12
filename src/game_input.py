@@ -142,7 +142,8 @@ class GameInput:
         elif action == 'jump':
             self.jump()
         elif action == 'jumpd':
-            self.stop_jump()
+            pass
+            #self.stop_jump()
         elif action == 'kick':
             self.kick()
         elif action == 'duck':
