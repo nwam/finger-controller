@@ -55,10 +55,10 @@ class DataGenerator(keras.utils.Sequence):
             path = os.path.join(self.data_dir, ID)
             im  = cv2.imread(path).astype(np.uint8)
             if self.datagen:
-                hue_shift = np.random.randint(-10,10)
-                im = cv2.cvtColor(im, cv2.COLOR_BGR2HSV)
-                im[...,0] = im[...,0] + hue_shift
-                im = cv2.cvtColor(im, cv2.COLOR_HSV2BGR)
+                #hue_shift = np.random.randint(-10,10)
+                #im = cv2.cvtColor(im, cv2.COLOR_BGR2HSV)
+                #im[...,0] = im[...,0] + hue_shift
+                #im = cv2.cvtColor(im, cv2.COLOR_HSV2BGR)
                 X[i,] = self.datagen.random_transform(im.astype(np.float64))
             y[i] = self.labels[ID]
 
@@ -147,9 +147,9 @@ def get_generators():
     datagen = ImageDataGenerator(
                     width_shift_range=0.2,
                     height_shift_range=0.2,
-                    rotation_range=11,
+                    #rotation_range=0.25,
                     rescale=1/255,
-                    shear_range=3,
+                    shear_range=0.25,
                     zoom_range=0.15,
                     fill_mode='nearest')
 
