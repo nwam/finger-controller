@@ -25,13 +25,13 @@ from dataset import gesture_ids
 from capture import Capture, CapType
 from game_input import GameInput
 from recording import CamSide, CamProps
-import debug
+import debug as debugutils
 
 sticky_size = 2
 tolerance_patience = 3
 h_pos_ratio = 0.425
 
-def finger_people(model_path, cap_source, cap_type, cam_props, record=None):
+def finger_people(model_path, cap_source, cap_type, cam_props, record=None, debug=False):
     model = keras.models.load_model(model_path)
     cap = Capture(cap_source, cap_type)
     game_input = GameInput()
@@ -119,22 +119,26 @@ def finger_people(model_path, cap_source, cap_type, cam_props, record=None):
                 (2, 10), cv2.FONT_HERSHEY_DUPLEX, 0.5, (0,255,0))
         h_line = int(h_pos_ratio * frame.shape[1])
         cv2.line(frame, (h_line, 0), (h_line, h), (0,0,255))
-        debug.put_hpos_text(frame, h_pos, h_pos_thresh)
 
-        cnn_input_debug = cv2.resize(cnn_input.frame, (h,h))
-        mhb_debug = debug.mhb_frame(mhb, h, h)
-        debug_frame = np.hstack((frame, cnn_input_debug, mhb_debug))
-        prediction_debug = debug.prediction_frame(
-                prediction, 300, debug_frame.shape[1])
-        if class_label in h_classes or hpos_color is None:
-            hpos_color = debug.hpos_color(h_pos, mhb.mhi.mhi.shape[1], h_pos_thresh,
-                    (200, debug_frame.shape[1]))
-        debug_frame = np.vstack((debug_frame, prediction_debug, hpos_color))
+        if debug:
+            debugutils.put_hpos_text(frame, h_pos, h_pos_thresh)
 
-        cv2.imshow('frame', debug_frame)
+            cnn_input_debug = cv2.resize(cnn_input.frame, (h,h))
+            mhb_debug = debugutils.mhb_frame(mhb, h, h)
+            debug_frame = np.hstack((frame, cnn_input_debug, mhb_debug))
+            prediction_debug = debugutils.prediction_frame(
+                    prediction, 300, debug_frame.shape[1])
+            if class_label in h_classes or hpos_color is None:
+                hpos_color = debugutils.hpos_color(h_pos, mhb.mhi.mhi.shape[1], h_pos_thresh,
+                        (200, debug_frame.shape[1]))
+            debug_frame = np.vstack((debug_frame, prediction_debug, hpos_color))
+        else:
+            debug_frame = frame
 
         if record:
             record.write(frame)
+
+        cv2.imshow('frame', debug_frame)
 
         ''' KEYBOARD INPUT '''
         key = cv2.waitKey(2) & 0xFF
@@ -156,7 +160,9 @@ if __name__ == '__main__':
     parser.add_argument('cap_type', nargs='*', default=['video'],
             help='The type of the Capture device used as video input.')
     parser.add_argument('-r', '--record', action='store_true',
-            help='Flag to record the debug frames to rec.avi.')
+            help='Flag to record the frames to rec.avi.')
+    parser.add_argument('-d', '--debug', action='store_true',
+            help='Display debug information along with frames.')
     args = parser.parse_args()
 
     model_path = args.model
@@ -189,4 +195,5 @@ if __name__ == '__main__':
 
     cam_props = CamProps(cam_side)
 
-    finger_people(model_path, cap_source, cap_type, cam_props, record)
+    finger_people(model_path, cap_source, cap_type, cam_props, record,
+            debug=args.debug)
