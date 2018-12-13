@@ -1,9 +1,9 @@
 """
-Input capture methods for finger-people.
+Input capture methods for finger-controller.
 
-This module allows us to select various methods of input for finger-people.
+This module allows us to select various methods of input for finger-controller.
 The different types are camera, video, and web. Camera and web (usually a
-video stream from a device on the same LAN) are used for actual finger-people
+video stream from a device on the same LAN) are used for actual finger-controller
 use while video is useful for tests since you can retest with the same video.
 
 Usage:

@@ -24,7 +24,7 @@ from capture import Capture, CapType
 from cnn_input import CnnInput
 import recording
 from recording import CamSide, CamProps
-from finger_people import h_pos_ratio
+from finger_controller import h_pos_ratio
 
 def record(cap_source, cap_type, recordings, cam_props, mock, output_dir='../data/'):
     cap = Capture(cap_source, cap_type)

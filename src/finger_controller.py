@@ -7,10 +7,10 @@ game based on the CNN's output.
 Usage:
     Run
 
-        python finger_people.py models/best_model.hdf5 124
+        python finger_controller.py models/best_model.hdf5 124
 
     to record from IP Webcam at http://192.168.0.124:8080/video then
-    start a game and press g to enable keyboard inputs from finger_people.
+    start a game and press g to enable keyboard inputs from finger_controller.
 """
 
 import cv2
@@ -31,7 +31,7 @@ sticky_size = 2
 tolerance_patience = 3
 h_pos_ratio = 0.425
 
-def finger_people(model_path, cap_source, cap_type, cam_props, record=None, debug=False):
+def finger_controller(model_path, cap_source, cap_type, cam_props, record=None, debug=False):
     model = keras.models.load_model(model_path)
     cap = Capture(cap_source, cap_type)
     game_input = GameInput()
@@ -195,5 +195,5 @@ if __name__ == '__main__':
 
     cam_props = CamProps(cam_side)
 
-    finger_people(model_path, cap_source, cap_type, cam_props, record,
+    finger_controller(model_path, cap_source, cap_type, cam_props, record,
             debug=args.debug)
