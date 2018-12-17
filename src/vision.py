@@ -94,7 +94,7 @@ class MHB:
     Max Horizontal Blob finds the max horizontal blob in an
     optical flow calculation.
     """
-    def __init__(self, cnn_input, percentile=80):
+    def __init__(self, cnn_input, percentile=80, mhi_alpha=0.25):
         """
         Args:
             cnn_input: CnnInput object
@@ -104,7 +104,7 @@ class MHB:
         self.clip = cnn_input.edge_clip
         self.flow = cnn_input.flow
         self.hmag = np.ones([v-2*self.clip for v in self.flow.hsv.shape[:2]])
-        self.mhi = MHI(self.hmag.shape, np.float, cnn_input.mhi.alpha)
+        self.mhi = MHI(self.hmag.shape, np.float, mhi_alpha)
         self.percentile = percentile
         self.contour = None
 

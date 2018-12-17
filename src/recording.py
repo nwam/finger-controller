@@ -4,6 +4,8 @@ Recording objects.
 """
 import random
 import enum
+import math
+from dataset import n_t_frames
 
 gestures = ['stand', 'walk', 'run', 'jump', 'jumpd', 'kick', 'duck', 'movef',
         'moveb']
@@ -46,12 +48,13 @@ class Recording:
         if self.frame is None:
             return []
         if self.rec_mode == RecMode.AFTER:
-            return list(range(self.frame, self.frame+self.n_frames))
+            return list(range(self.frame-n_t_frames, self.frame+self.n_frames))
         elif self.rec_mode == RecMode.MIDDLE:
-            half = self.n_frames // 2
-            return list(range(self.frame-half, self.frame+half+1))
+            half = (self.n_frames + n_t_frames) / 2
+            return list(range(math.floor(self.frame-half),
+                math.ceil(self.frame+half+1)))
         elif self.rec_mode == RecMode.BEFORE:
-            return list(range(self.frame-self.n_frames, self.frame))
+            return list(range(self.frame-self.n_frames, self.frame + n_t_frames))
 
     def __str__(self):
         return '{}'.format(self.info)

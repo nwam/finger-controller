@@ -57,7 +57,7 @@ def record(cap_source, cap_type, recordings, cam_props, mock, output_dir='../dat
         h_line = int(h_pos_ratio * frame.shape[1])
         cv2.line(frame, (h_line, 0), (h_line, h), (0,0,255))
         cnn_input.update(frame)
-        cnn_input_show = cv2.resize(cnn_input.frame, (h,h))
+        cnn_input_show = cv2.resize(cnn_input.frames[-1], (h,h))
         action_display = np.zeros((h, frame.shape[1]+h, 3), dtype=np.uint8)
         if record_n > 0:
             complete = (recordings[rec_i-1].n_frames - record_n) /\

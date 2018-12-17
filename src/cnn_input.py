@@ -15,19 +15,24 @@ import cv2
 import numpy as np
 import dataset
 import vision
+from collections import deque
 
 class CnnInput:
-    def __init__(self, first_frame, edge_clip=3, mhi_alpha=0.25, debug=False):
+    def __init__(self, first_frame, edge_clip=3, mhi_alpha=1, debug=False):
         self.edge_clip = edge_clip
         self.original_shape = tuple([n + 2*self.edge_clip
-                for n in reversed(dataset.input_shape[:2])])
+                for n in reversed(dataset.frame_shape[:2])])
         self.debug = debug
 
         first_frame = self._prepare_frame(first_frame)
         self.flow = vision.OpticalFlow(first_frame)
         self.mhi = vision.MHI(self.flow.hsv.shape, np.uint8, mhi_alpha)
-        self.frame = self.mhi.mhi[self.edge_clip:-self.edge_clip,
-                self.edge_clip:-self.edge_clip]
+
+        self.frames = deque()
+        for _ in range(dataset.n_t_frames - 1):
+            self.frames.append(np.zeros_like(dataset.frame_shape))
+        self.frames.append(self.mhi.mhi[self.edge_clip:-self.edge_clip,
+                self.edge_clip:-self.edge_clip])
 
     def update(self, frame):
         resized_frame = self._resize_frame(frame)
@@ -41,7 +46,8 @@ class CnnInput:
         if self.debug:
             cv2.imshow('cnn_input', np.hstack((resized_frame, self.flow.vis, self.mhi.mhi)))
 
-        self.frame = clipped_mhi
+        self.frames.popleft()
+        self.frames.append(clipped_mhi)
 
     def _resize_frame(self, frame):
         if frame.shape[:2] != self.original_shape:

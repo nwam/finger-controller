@@ -89,7 +89,7 @@ def preprocess(data_dir=data_dir):
                 output_name = '{}-{}-{}{}'.format(
                         str(file_id), str(rec_i), str(recf_i), ftype)
                 output_path = os.path.join(output_dir, output_name)
-                cv2.imwrite(output_path, cnn_input.frame)
+                cv2.imwrite(output_path, cnn_input.frames[-1])
                 data[recordings[rec_i].label][-1].append(
                         os.path.join(recordings[rec_i].label, output_name))
                 recf_i += 1

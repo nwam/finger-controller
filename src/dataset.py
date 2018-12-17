@@ -21,7 +21,9 @@ import numpy as np
 import cv2
 from collections import defaultdict
 
-input_shape = (28, 28, 3)
+n_t_frames = 7
+frame_shape = (28, 28, 3)
+input_shape = (n_t_frames, *frame_shape)
 #gestures = ['stand', 'walk', 'run', 'jump', 'jumpd', 'kick', 'duck', 'movef',
 #        'moveb']
 gestures = ['stand', 'run', 'jump', 'jumpd', 'kick', 'duck', 'movef', 'moveb']
