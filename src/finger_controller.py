@@ -36,7 +36,7 @@ def finger_controller(model_path, cap_source, cap_type, cam_props, record=None, 
     game_input = GameInput()
     ret, first_frame = cap.read()
     cnn_input = CnnInput(first_frame)
-    run_processor = RunProcessor(cnn_input, game_input)
+    run_processor = RunProcessor(cnn_input)
     sticky_tolerance = StickyTolerance()
 
     action = None
@@ -59,7 +59,12 @@ def finger_controller(model_path, cap_source, cap_type, cam_props, record=None, 
         class_label = dataset.id_to_gesture[class_id]
 
         ''' WALK vs RUN and Direction '''
-        class_label = run_processor.process(class_label)
+        class_label, direction = run_processor.process(class_label)
+        if direction is not None:
+            if direction == 'forward':
+                game_input.direction_forward()
+            elif direction == 'backward':
+                game_input.direction_backward()
 
         ''' STICKY OUTPUT and TOLERANCE'''
         action = sticky_tolerance.process(class_label, prediction[class_id], action)

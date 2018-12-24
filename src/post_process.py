@@ -1,9 +1,8 @@
 from vision import MHB
 
 class RunProcessor:
-    def __init__(self, cnn_input, game_input):
+    def __init__(self, cnn_input):
         self.mhb = MHB(cnn_input, 90)
-        self.game_input = game_input
         self.h_pos_ratio = 0.425
         self.h_speed_alpha = 0.2
         self.h_speed_thresh = 5.0
@@ -17,15 +16,15 @@ class RunProcessor:
         if class_label not in self.h_classes:
             self.h_speed = self.h_speed_thresh
             self.h_pos = self.h_pos_thresh
-            return class_label
+            return class_label, None
         else:
             mhb_speed, mhb_pos = self.mhb.compute()
 
             self.h_pos = self.h_pos_alpha*mhb_pos[1] + (1-self.h_pos_alpha)*self.h_pos
             if self.h_pos > self.h_pos_thresh:
-                self.game_input.direction_forward()
+                direction = 'forward'
             else:
-                self.game_input.direction_backward()
+                direction = 'backward'
 
             self.h_speed = self.h_speed_alpha*mhb_speed + (1-self.h_speed_alpha)*self.h_speed
 
@@ -35,7 +34,7 @@ class RunProcessor:
                 else:
                     return 'walk'
             else:
-                return class_label
+                return class_label, direction
 
 class StickyTolerance:
     def __init__(self):
