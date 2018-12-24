@@ -28,7 +28,7 @@ from recording import CamSide, CamProps
 import debug as debugutils
 
 sticky_size = 2
-tolerance_patience = 3
+tolerance_patience = 2
 h_pos_ratio = 0.425
 
 def finger_controller(model_path, cap_source, cap_type, cam_props, record=None, debug=False):

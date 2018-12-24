@@ -23,7 +23,7 @@ gesture_ids = dataset.gesture_ids
 id_to_gesture = dataset.id_to_gesture
 paths = dataset.flatten_bundles(dataset.get_bundles())
 
-def confusion_matrix(model, data_dir=data_dir, n=500):
+def confusion_matrix(model, data_dir=data_dir, n=1197):
     confusion = np.zeros((dataset.n_classes, dataset.n_classes))
 
     for gesture in gesture_ids:
@@ -41,7 +41,6 @@ def confusion_matrix(model, data_dir=data_dir, n=500):
 def plot_confusion_matrix(confusion):
     plt.imshow(confusion, cmap='Greens')
     plt.title('Gesture CNN Confusion Matrix')
-    plt.colorbar()
     tick_marks = np.arange(len(gestures))
     plt.xticks(tick_marks, gestures, rotation=45)
     plt.yticks(tick_marks, gestures)
