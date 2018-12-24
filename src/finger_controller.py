@@ -26,31 +26,22 @@ from capture import Capture, CapType
 from game_input import GameInput
 from recording import CamSide, CamProps
 import debug as debugutils
-from post_process import RunProcessor
+from post_process import RunProcessor, StickyTolerance
 
-sticky_size = 2
-tolerance_patience = 2
 h_pos_ratio = 0.425
 
 def finger_controller(model_path, cap_source, cap_type, cam_props, record=None, debug=False):
     model = keras.models.load_model(model_path)
     cap = Capture(cap_source, cap_type)
     game_input = GameInput()
-
     ret, first_frame = cap.read()
     cnn_input = CnnInput(first_frame)
-
     run_processor = RunProcessor(cnn_input, game_input)
-    hpos_color = None
+    sticky_tolerance = StickyTolerance()
 
     action = None
-    prev_label = None
-    sticky = 0
-    patience = tolerance_patience
-    tolerance = 0.7
-
+    hpos_color = None
     h = first_frame.shape[0]
-
 
     while cap.is_opened():
         ret, frame = cap.read()
@@ -71,22 +62,7 @@ def finger_controller(model_path, cap_source, cap_type, cam_props, record=None, 
         class_label = run_processor.process(class_label)
 
         ''' STICKY OUTPUT and TOLERANCE'''
-        if prediction[class_id] < tolerance:
-            patience -= 1
-            if patience < 0:
-                action = None
-            else:
-                action = prev_label
-        else:
-            patience = tolerance_patience
-
-        if class_label != prev_label:
-            sticky_i = 0
-        if sticky_i < sticky_size:
-            sticky_i += 1
-        else:
-            action = class_label
-        prev_label = class_label
+        action = sticky_tolerance.process(class_label, prediction[class_id], action)
 
         ''' GAME INPUT '''
         game_input.do(action)

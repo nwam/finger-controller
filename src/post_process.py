@@ -36,3 +36,33 @@ class RunProcessor:
                     return 'walk'
             else:
                 return class_label
+
+class StickyTolerance:
+    def __init__(self):
+        self.prev_label = None
+        self.tolerance = 0.7
+        self.tolerance_patience = 2
+        self.patience = self.tolerance_patience
+        self.sticky_size = 2
+        self.sticky = 0
+        self.sticky_i = 0
+
+    def process(self, class_label, certainty, action):
+        if certainty < self.tolerance:
+            self.patience -= 1
+            if self.patience < 0:
+                action = None
+            else:
+                action = self.prev_label
+        else:
+            self.patience = self.tolerance_patience
+
+        if class_label != self.prev_label:
+            self.sticky_i = 0
+        if self.sticky_i < self.sticky_size:
+            self.sticky_i += 1
+        else:
+            action = class_label
+        self.prev_label = class_label
+
+        return action
