@@ -26,6 +26,7 @@ from capture import Capture, CapType
 from game_input import GameInput
 from recording import CamSide, CamProps
 import debug as debugutils
+from post_process import RunProcessor
 
 sticky_size = 2
 tolerance_patience = 2
@@ -39,14 +40,7 @@ def finger_controller(model_path, cap_source, cap_type, cam_props, record=None, 
     ret, first_frame = cap.read()
     cnn_input = CnnInput(first_frame)
 
-    mhb = MHB(cnn_input, 90)
-    h_speed_alpha = 0.2
-    h_speed_thresh = 5.0
-    h_speed = h_speed_thresh
-    h_pos_alpha = 0.3
-    h_pos_thresh = mhb.hmag.shape[1] * h_pos_ratio
-    h_pos = h_pos_thresh
-    h_classes = ['run', 'walk', 'movef', 'moveb']
+    run_processor = RunProcessor(cnn_input, game_input)
     hpos_color = None
 
     action = None
@@ -74,23 +68,7 @@ def finger_controller(model_path, cap_source, cap_type, cam_props, record=None, 
         class_label = dataset.id_to_gesture[class_id]
 
         ''' WALK vs RUN and Direction '''
-        if class_label not in h_classes:
-            h_speed = h_speed_thresh
-            h_pos = h_pos_thresh
-        else:
-            mhb_speed, mhb_pos = mhb.compute()
-
-            h_pos = h_pos_alpha*mhb_pos[1] + (1-h_pos_alpha)*h_pos
-            if h_pos > h_pos_thresh:
-                game_input.direction_forward()
-            else:
-                game_input.direction_backward()
-
-            h_speed = h_speed_alpha*mhb_speed + (1-h_speed_alpha)*h_speed
-            if h_speed > h_speed_thresh:
-                class_label = 'run'
-            else:
-                class_label = 'walk'
+        class_label = run_processor.process(class_label)
 
         ''' STICKY OUTPUT and TOLERANCE'''
         if prediction[class_id] < tolerance:
@@ -115,7 +93,7 @@ def finger_controller(model_path, cap_source, cap_type, cam_props, record=None, 
 
         ''' OUTPUT / DEBUG / FEEDBACK '''
         cv2.putText(frame, action, (2, h-3), cv2.FONT_HERSHEY_DUPLEX, 0.5, (0,255,0))
-        cv2.putText(frame, str(int(h_speed)),
+        cv2.putText(frame, str(int(run_processor.h_speed)),
                 (2, 10), cv2.FONT_HERSHEY_DUPLEX, 0.5, (0,255,0))
         h_line = int(h_pos_ratio * frame.shape[1])
         cv2.line(frame, (h_line, 0), (h_line, h), (0,0,255))
@@ -124,7 +102,7 @@ def finger_controller(model_path, cap_source, cap_type, cam_props, record=None, 
             debugutils.put_hpos_text(frame, h_pos, h_pos_thresh)
 
             cnn_input_debug = cv2.resize(cnn_input.frame, (h,h))
-            mhb_debug = debugutils.mhb_frame(mhb, h, h)
+            mhb_debug = debugutils.mhb_frame(run_processor.mhb, h, h)
             debug_frame = np.hstack((frame, cnn_input_debug, mhb_debug))
             prediction_debug = debugutils.prediction_frame(
                     prediction, 300, debug_frame.shape[1])
