@@ -22,17 +22,17 @@ class RunProcessor:
 
             self.h_pos = self.h_pos_alpha*mhb_pos[1] + (1-self.h_pos_alpha)*self.h_pos
             if self.h_pos > self.h_pos_thresh:
-                direction = 'forward'
+                direction = 'f'
             else:
-                direction = 'backward'
+                direction = 'b'
 
             self.h_speed = self.h_speed_alpha*mhb_speed + (1-self.h_speed_alpha)*self.h_speed
 
             if class_label in ['run', 'walk']:
                 if self.h_speed > self.h_speed_thresh:
-                    return 'run'
+                    return 'run', direction
                 else:
-                    return 'walk'
+                    return 'walk', direction
             else:
                 return class_label, direction
 

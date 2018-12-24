@@ -61,9 +61,9 @@ def finger_controller(model_path, cap_source, cap_type, cam_props, record=None, 
         ''' WALK vs RUN and Direction '''
         class_label, direction = run_processor.process(class_label)
         if direction is not None:
-            if direction == 'forward':
+            if direction == 'f':
                 game_input.direction_forward()
-            elif direction == 'backward':
+            elif direction == 'b':
                 game_input.direction_backward()
 
         ''' STICKY OUTPUT and TOLERANCE'''
