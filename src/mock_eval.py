@@ -86,6 +86,12 @@ def eval_kb(fname_pickle):
     for r, recording in enumerate(recordings):
         if recordings[r].label in ['jumpb', 'jumps']:
             recordings[r].label = 'jump'
+
+        if get_kb_action(pressed) == recording.label and \
+                recording.label not in ['kick', 'jump']:
+            hits[r] = 1
+            speeds[r] = 0
+
         while r+1 >= len(recordings) or \
                 (len(pressed) > 0 and pressed[-1].release < recordings[r+1].frame) or \
                 (p < len(presses) and presses[p].press < recordings[r+1].frame):
@@ -202,4 +208,3 @@ if __name__ == '__main__':
         extras.append(es)
     print('FC SUMMARY')
     print_stats(recordings, hits, speeds, extras)
-    #eval_fc(os.path.join(fp_dir, '1544492021.8871984.pickle'), args.model)
