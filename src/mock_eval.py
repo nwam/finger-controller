@@ -9,7 +9,8 @@ import keras
 import argparse
 import dataset
 import numpy as np
-from pynput.keyboard import Key
+from pynput.keyboard import Key, KeyCode
+from collections import defaultdict
 
 data_dir = '../mock_data/'
 kb_dir = os.path.join(data_dir, 'kb')
@@ -52,9 +53,9 @@ def eval_fc(fname_pickle, model_path):
         if direction is not None and action in ['walk', 'run']:
             action = action + direction
 
+        if recordings[rec_i].label in ['jumpb', 'jumps']:
+            recordings[rec_i].label = 'jump'
         target = recordings[rec_i].label
-        if target in ['jumpb', 'jumps']:
-            target = 'jump'
         if action == target and hits[rec_i] == 0:
             hits[rec_i] = 1
             speeds[rec_i] = frame_num - recordings[rec_i].frame
@@ -65,7 +66,7 @@ def eval_fc(fname_pickle, model_path):
                 speeds[rec_i] = frame_num - recordings[rec_i].frame
             rec_i += 1
 
-    return hits, speed, extras
+    return recordings, hits, speeds, extras
 
 def eval_kb(fname_pickle):
     data = pickle.load(open(fname_pickle, 'rb'))
@@ -83,6 +84,8 @@ def eval_kb(fname_pickle):
             press.release = press.press + 0.1
 
     for r, recording in enumerate(recordings):
+        if recordings[r].label in ['jumpb', 'jumps']:
+            recordings[r].label = 'jump'
         while r+1 >= len(recordings) or \
                 (len(pressed) > 0 and pressed[-1].release < recordings[r+1].frame) or \
                 (p < len(presses) and presses[p].press < recordings[r+1].frame):
@@ -107,8 +110,6 @@ def eval_kb(fname_pickle):
             action = get_kb_action(pressed)
 
             target = recording.label
-            if target in ['jumpb', 'jumps']:
-                target = 'jump'
             if action == target and hits[r] == 0:
                 hits[r] = 1
                 speeds[r] = t - recording.frame
@@ -119,9 +120,7 @@ def eval_kb(fname_pickle):
             else:
                 speeds[r] = 1.5
 
-    import pdb
-    pdb.set_trace()
-    return hits, speeds, extras
+    return recordings, hits, speeds, extras
 
 def get_kb_action(pressed):
     pressed_set = set([p.key for p in pressed])
@@ -130,20 +129,43 @@ def get_kb_action(pressed):
         return 'stand'
     elif pressed_set == set([Key.right]):
         return 'walkf'
-    elif pressed_set == set([Key.right, 'd']):
+    elif pressed_set == set([Key.right, KeyCode.from_char('d')]):
         return 'runf'
     elif pressed_set == set([Key.left]):
         return 'walkb'
-    elif pressed_set == set([Key.left, 'd']):
+    elif pressed_set == set([Key.left, KeyCode.from_char('d')]):
         return 'runb'
-    elif pressed_set == set(['f']):
+    elif pressed_set == set([KeyCode.from_char('f')]):
         return 'jump'
-    elif pressed_set == set(['d']):
+    elif pressed_set == set([KeyCode.from_char('d')]):
         return 'kick'
     elif pressed_set == set([Key.down]):
         return 'duck'
     return None
 
+def print_stats(recordings, hits, speeds, extras):
+    hit_percents = np.array([np.sum(h)/len(h) for h in hits])
+    hit_percent = np.average(hit_percents)
+    print('Hit percent: ' + str(hit_percent))
+
+    gesture_hits = defaultdict(list)
+    for rs, hs in zip(recordings, hits):
+        for r, h in zip(rs, hs):
+            gesture_hits[r.label].append(h)
+    for gesture in gesture_hits:
+        gesture_hits[gesture] = \
+                sum(gesture_hits[gesture]) / len(gesture_hits[gesture]), \
+                len(gesture_hits[gesture])
+    print(gesture_hits)
+
+    speed_avgs = np.array([np.sum(s)/len(s) for s in speeds])
+    speed_avg = np.average(speed_avgs)
+    print('Speed avg: ' + str(speed_avg))
+
+    hit_speed_avgs = np.array(
+            [np.sum(s*h)/np.sum(h) for s, h in zip(speeds, hits)])
+    hit_speed_avg = np.average(hit_speed_avgs)
+    print('Hit speed avg: ' + str(hit_speed_avg))
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -151,5 +173,33 @@ if __name__ == '__main__':
             help='Path to gesture recognition .hdf5 keras model')
     args = parser.parse_args()
 
-    eval_kb(os.path.join(kb_dir, '1544500883.9772544.pickle'))
+    recordings = []
+    hits = []
+    speeds = []
+    extras = []
+    for fname in os.listdir(kb_dir):
+        if os.path.splitext(fname)[1] != '.pickle':
+            continue
+        rs, hs, ss, es = eval_kb(os.path.join(kb_dir, fname))
+        recordings.append(rs)
+        hits.append(hs)
+        speeds.append(ss)
+        extras.append(es)
+    print('KB SUMMARY')
+    print_stats(recordings, hits, speeds, extras)
+
+    recordings = []
+    hits = []
+    speeds = []
+    extras = []
+    for fname in os.listdir(fp_dir):
+        if os.path.splitext(fname)[1] != '.pickle':
+            continue
+        rs, hs, ss, es = eval_fc(os.path.join(fp_dir, fname), args.model)
+        recordings.append(rs)
+        hits.append(hs)
+        speeds.append(ss)
+        extras.append(es)
+    print('FC SUMMARY')
+    print_stats(recordings, hits, speeds, extras)
     #eval_fc(os.path.join(fp_dir, '1544492021.8871984.pickle'), args.model)
