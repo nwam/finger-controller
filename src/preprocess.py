@@ -93,6 +93,14 @@ def preprocess(data_dir=data_dir):
                 data[recordings[rec_i].label][-1].append(
                         os.path.join(recordings[rec_i].label, output_name))
                 recf_i += 1
+            else:
+                output_name = '{}{}'.format(len(data['nothing']), ftype)
+                output_path = os.path.join(
+                        output_dir_prefix, 'nothing', output_name)
+                cv2.imwrite(output_path, cnn_input.frame)
+                data['nothing'].append(
+                        [os.path.join('nothing', output_name)])
+
 
             frames_i += 1
 

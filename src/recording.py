@@ -5,8 +5,9 @@ Recording objects.
 import random
 import enum
 
-gestures = ['stand', 'walk', 'run', 'jump', 'jumpd', 'kick', 'duck', 'movef',
-        'moveb']
+#gestures = ['stand', 'walk', 'run', 'jump', 'jumpd', 'kick', 'duck', 'movef',
+#        'moveb']
+gestures = ['flap', 'nothing']
 
 class CamSide(enum.Enum):
     LEFT = 0
@@ -59,7 +60,13 @@ class Recording:
     def __repr__(self):
         return '{}'.format(self.info)
 
-def generate_sequence(positions=['front', 'center', 'back']):
+def generate_sequence():
+    recordings = []
+    for _ in range(16):
+        recordings.append(Recording('flap', 'flap'))
+    return recordings
+
+def generate_sequence_platformer(positions=['front', 'center', 'back']):
     n = len(positions)
     seq = []
 

@@ -24,7 +24,8 @@ from collections import defaultdict
 input_shape = (28, 28, 3)
 #gestures = ['stand', 'walk', 'run', 'jump', 'jumpd', 'kick', 'duck', 'movef',
 #        'moveb']
-gestures = ['stand', 'run', 'jump', 'jumpd', 'kick', 'duck', 'movef', 'moveb']
+#gestures = ['stand', 'run', 'jump', 'jumpd', 'kick', 'duck', 'movef', 'moveb']
+gestures = ['flap', 'nothing']
 gesture_ids = dict([(gesture, i) for i, gesture in enumerate(gestures)])
 id_to_gesture = dict([(v,k) for k,v in gesture_ids.items()])
 n_classes = len(gesture_ids)
