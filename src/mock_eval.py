@@ -192,6 +192,7 @@ if __name__ == '__main__':
         speeds.append(ss)
         extras.append(es)
     print('KB SUMMARY')
+    pickle.dump((recordings, hits, speeds, extras), open('kb_summary.pickle', 'wb'))
     print_stats(recordings, hits, speeds, extras)
 
     recordings = []
@@ -207,4 +208,5 @@ if __name__ == '__main__':
         speeds.append(ss)
         extras.append(es)
     print('FC SUMMARY')
+    pickle.dump((recordings, hits, speeds, extras), open('fc_summary.pickle', 'wb'))
     print_stats(recordings, hits, speeds, extras)

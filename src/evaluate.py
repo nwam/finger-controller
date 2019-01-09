@@ -36,24 +36,25 @@ def confusion_matrix(model, data_dir=data_dir, n=1197):
             prediction_id = np.argmax(prediction)
             confusion[actual_id][prediction_id] += 1
 
-    return confusion.astype(int)
+    confusion = confusion / n * 100
+    return np.round(confusion).astype(int)
 
 def plot_confusion_matrix(confusion):
     plt.imshow(confusion, cmap='Greens')
-    plt.title('Gesture CNN Confusion Matrix')
+    plt.title('Gesture CNN Confusion Matrix', fontsize=16)
     tick_marks = np.arange(len(gestures))
-    plt.xticks(tick_marks, gestures, rotation=45)
-    plt.yticks(tick_marks, gestures)
+    plt.xticks(tick_marks, gestures, rotation=45, fontsize=12)
+    plt.yticks(tick_marks, gestures, fontsize=12)
 
     thresh = confusion.max() / 2
     for i, j in itertools.product(
             range(confusion.shape[0]), range(confusion.shape[1])):
-        plt.text(j, i, format(confusion[i, j], 'd'),
+        plt.text(j, i, '{}%'.format(confusion[i, j]),
                 horizontalalignment='center',
                 color='white' if confusion[i, j] > thresh else 'black')
 
-    plt.xlabel('Predicted gesture')
-    plt.ylabel('Actual gesture')
+    plt.xlabel('Predicted gesture', fontsize=14)
+    plt.ylabel('Actual gesture', fontsize=14)
     plt.tight_layout()
     plt.show()
 

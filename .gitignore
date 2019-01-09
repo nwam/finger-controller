@@ -8,3 +8,4 @@ src/checkpoints/*
 **/.ipynb_checkpoints/*
 *.swp
 **/tensorboard_logs/*
+*.pickle
