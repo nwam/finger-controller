@@ -80,17 +80,12 @@ def finger_controller(model_path, cap_source, cap_type, cam_props, record=None, 
         cv2.line(frame, (h_line, 0), (h_line, h), (0,0,255))
 
         if debug:
-            debugutils.put_hpos_text(frame, h_pos, h_pos_thresh)
-
             cnn_input_debug = cv2.resize(cnn_input.frame, (h,h))
             mhb_debug = debugutils.mhb_frame(run_processor.mhb, h, h)
             debug_frame = np.hstack((frame, cnn_input_debug, mhb_debug))
             prediction_debug = debugutils.prediction_frame(
                     prediction, 300, debug_frame.shape[1])
-            if class_label in h_classes or hpos_color is None:
-                hpos_color = debugutils.hpos_color(h_pos, mhb.mhi.mhi.shape[1], h_pos_thresh,
-                        (200, debug_frame.shape[1]))
-            debug_frame = np.vstack((debug_frame, prediction_debug, hpos_color))
+            debug_frame = np.vstack((debug_frame, prediction_debug))
         else:
             debug_frame = frame
 

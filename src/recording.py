@@ -7,7 +7,7 @@ import enum
 
 #gestures = ['stand', 'walk', 'run', 'jump', 'jumpd', 'kick', 'duck', 'movef',
 #        'moveb']
-gestures = ['flap', 'nothing']
+gestures = ['flap', 'dflap', 'nothing']
 
 class CamSide(enum.Enum):
     LEFT = 0
@@ -64,6 +64,7 @@ def generate_sequence():
     recordings = []
     for _ in range(16):
         recordings.append(Recording('flap', 'flap'))
+        recordings.append(Recording('dflap', 'dflap'))
     return recordings
 
 def generate_sequence_platformer(positions=['front', 'center', 'back']):

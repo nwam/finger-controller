@@ -25,7 +25,7 @@ input_shape = (28, 28, 3)
 #gestures = ['stand', 'walk', 'run', 'jump', 'jumpd', 'kick', 'duck', 'movef',
 #        'moveb']
 #gestures = ['stand', 'run', 'jump', 'jumpd', 'kick', 'duck', 'movef', 'moveb']
-gestures = ['flap', 'nothing']
+gestures = ['flap', 'dflap', 'nothing']
 gesture_ids = dict([(gesture, i) for i, gesture in enumerate(gestures)])
 id_to_gesture = dict([(v,k) for k,v in gesture_ids.items()])
 n_classes = len(gesture_ids)
@@ -139,9 +139,17 @@ def partition_labels(bundles, train=0.8):
 
     return partition
 
+def normalize_nothing_bundle_count(bundles):
+    bundle_count = len(bundles['flap'])
+    bundle_size = len(bundles['flap'][0])
+    random.shuffle(bundles['nothing'])
+    bundles['nothing'] = bundles['nothing'][:bundle_count*bundle_size]
+    return bundles
+
 def get_generators():
     """ Creates and returns a train and test generators. """
     bundles = get_bundles()
+    bundles = normalize_nothing_bundle_count(bundles)
     labels = get_labels(bundles)
     partition = partition_labels(bundles)
 
