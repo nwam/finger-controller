@@ -29,7 +29,7 @@ import debug as debugutils
 from post_process import RunProcessor, StickyTolerance
 
 h_pos_ratio = 0.425
-flap_thresh = 0.3
+flap_thresh = 0.2
 
 def finger_controller(model_path, cap_source, cap_type, cam_props, record=None, debug=False):
     model = keras.models.load_model(model_path)

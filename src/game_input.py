@@ -31,12 +31,13 @@ class Key(enum.Enum):
     RIGHT = 11
     UP = 12
     DOWN = 13
+    FLAP = 20
 
 class GameInput:
 
     def __init__(self, tap_time=1/30, key_a='f', key_b='d', key_l=PKey.left,
-            key_r=PKey.right, key_u=PKey.up, key_d=PKey.down, enabled=False,
-            jump_cooldown=0.8):
+            key_r=PKey.right, key_u=PKey.up, key_d=PKey.down, key_f=PKey.space,
+            enabled=False, jump_cooldown=0.8):
         self.keys = {}
         self.keys[Key.A] = key_a
         self.keys[Key.B] = key_b
@@ -44,6 +45,7 @@ class GameInput:
         self.keys[Key.RIGHT] = key_r
         self.keys[Key.UP] = key_u
         self.keys[Key.DOWN] = key_d
+        self.keys[Key.FLAP] = key_f
         self.pressed = dict([(key, False) for key in self.keys.keys()])
         self.curr_action = ''
         self.prev_action = ''
@@ -126,9 +128,16 @@ class GameInput:
     def direction_backward(self):
         self.direction = Direction.LEFT
 
+    def flap(self):
+        self.keydown(Key.FLAP)
+
+    def uflap(self):
+        self.keyup(Key.FLAP)
+
     def perform(self, action):
         if self.curr_action != action:
-            self.prev_action = self.curr_action
+            if self.curr_action != None:
+                self.prev_action = self.curr_action
             self.curr_action = action
 
         if not self.enabled or action is None:
@@ -158,6 +167,10 @@ class GameInput:
                 self.run(Direction.LEFT)
             else:
                 self.walk(Direction.LEFT)
+        elif action == 'flap':
+            self.uflap()
+        elif action == 'dflap':
+            self.flap()
 
     def do(self, action):
         t = threading.Thread(target=self.perform, args=(action,))
