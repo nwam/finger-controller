@@ -29,6 +29,7 @@ import debug as debugutils
 from post_process import RunProcessor, StickyTolerance
 
 h_pos_ratio = 0.425
+flap_thresh = 0.3
 
 def finger_controller(model_path, cap_source, cap_type, cam_props, record=None, debug=False):
     model = keras.models.load_model(model_path)
@@ -56,15 +57,14 @@ def finger_controller(model_path, cap_source, cap_type, cam_props, record=None, 
         prediction = model.predict(cnn_input_4d)[0]
 
         class_id = np.argmax(prediction)
+        flap_pred = prediction[dataset.gesture_ids['flap']]
+        dflap_pred = prediction[dataset.gesture_ids['dflap']]
+        if flap_pred > flap_thresh or dflap_pred > flap_thresh:
+            if flap_pred > dflap_pred:
+                class_id = dataset.gesture_ids['flap']
+            else:
+                class_id = dataset.gesture_ids['dflap']
         class_label = dataset.id_to_gesture[class_id]
-
-        ''' WALK vs RUN and Direction '''
-        class_label, direction = run_processor.process(class_label)
-        if direction is not None:
-            if direction == 'f':
-                game_input.direction_forward()
-            elif direction == 'b':
-                game_input.direction_backward()
 
         ''' STICKY OUTPUT and TOLERANCE'''
         action = sticky_tolerance.process(class_label, prediction[class_id], action)
