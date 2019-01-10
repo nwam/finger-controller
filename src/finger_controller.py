@@ -74,7 +74,7 @@ def finger_controller(model_path, cap_source, cap_type, cam_props, record=None, 
 
         ''' OUTPUT / DEBUG / FEEDBACK '''
         cv2.putText(frame, action, (2, h-3), cv2.FONT_HERSHEY_DUPLEX, 0.5, (0,255,0))
-        cv2.putText(frame, str(int(run_processor.h_speed)),
+        cv2.putText(frame, '{:.3f}'.format(run_processor.h_speed),
                 (2, 10), cv2.FONT_HERSHEY_DUPLEX, 0.5, (0,255,0))
         h_line = int(h_pos_ratio * frame.shape[1])
         cv2.line(frame, (h_line, 0), (h_line, h), (0,0,255))

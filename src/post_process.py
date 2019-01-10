@@ -5,7 +5,7 @@ class RunProcessor:
         self.mhb = MHB(cnn_input, 90)
         self.h_pos_ratio = 0.425
         self.h_speed_alpha = 0.2
-        self.h_speed_thresh = 1.25
+        self.h_speed_thresh = 0.4
         self.h_speed = self.h_speed_thresh
         self.h_pos_alpha = 0.3
         self.h_pos_thresh = self.mhb.hmag.shape[1] * self.h_pos_ratio
